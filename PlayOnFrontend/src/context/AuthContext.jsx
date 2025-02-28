@@ -39,11 +39,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    await logoutUser();
+  const logout = async (navigation) => {
+    setLoading(true);
+    await logoutUser(); // Logout API call (if applicable)
     setUser(null);
     await AsyncStorage.removeItem("user");
+    setLoading(false);
+    navigation.replace("Auth"); // Reset navigation to login screen
   };
+  
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
