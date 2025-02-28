@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { TurfContext } from "../context/TurfContext";
 import TurfCard from "../components/TurfCard";
 import SearchBar from "../components/SearchBar";
@@ -8,8 +8,14 @@ const HomeScreen = ({ navigation }) => {
   const { turfs, loading} = useContext(TurfContext);
   const [searchQuery, setSearchQuery] = useState("");
 
-  if (loading) return <Text>Loading Turfs...</Text>;
-
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#007bff" />
+        <Text>Loading Turfs...</Text>
+      </View>
+    );
+  }
   const filteredTurfs = turfs.filter((turf) =>
     turf.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

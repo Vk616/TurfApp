@@ -17,7 +17,7 @@ const BookingScreen = ({ route, navigation }) => {
     try {
       await createBooking(user.token, turfId, date, timeSlot);
       alert("Booking Successful!");
-      navigation.navigate("Home");
+      navigation.navigate("Main", { screen: "Home" });
     } catch (error) {
       alert("Booking Failed: " + error.message);
     }
