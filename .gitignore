@@ -1,0 +1,36 @@
+# Node.js dependencies (for both PlayOnFrontend and backend)
+backend/node_modules/
+PlayOnFrontend/node_modules/
+
+# Environment variables
+backend/.env
+PlayOnFrontend/.env
+PlayOnFrontend/src/config/firebase.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo and React Native
+PlayOnFrontend/.expo/
+PlayOnFrontend/.expo-shared/
+android/
+ios/
+
+# Build and cache directories
+backend/dist/
+backend/build/
+PlayOnFrontend/.cache/
+PlayOnFrontend/.web/
+
+# VS Code and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Git related
+.git/
