@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
-import BookingScreen from "../screens/BookingScreen";
+import BookingHistoryScreen from "../screens/BookingHistoryScreen"; // Renamed for clarity
 import ProfileScreen from "../screens/ProfileScreen";
 import EventsScreen from "../screens/EventsScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
@@ -18,7 +18,7 @@ const TabNavigator = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName;
           if (route.name === "Home") iconName = "home";
-          else if (route.name === "Bookings") iconName = "calendar";
+          else if (route.name === "My Bookings") iconName = "calendar"; // Booking history
           else if (route.name === "Profile") iconName = "person";
           else if (route.name === "Events") iconName = "trophy";
           else if (route.name === "Notifications") iconName = "notifications";
@@ -31,7 +31,7 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Bookings" component={BookingScreen} />
+      <Tab.Screen name="My Bookings" component={BookingHistoryScreen} /> 
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Events" component={EventsScreen} />
       <Tab.Screen name="Notifications" component={NotificationsScreen} />

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.2.103:5000/api/admin"; // Change to backend IP if needed
+const API_URL = "http://192.168.1.2:5000/api/admin"; // Change to backend IP if needed
 
 export const getAllUsers = async (token) => {
   try {

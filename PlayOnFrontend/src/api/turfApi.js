@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Set the base URL of the backend
-const API_URL = "http://192.168.2.103:5000/api/turfs";
+const API_URL = "http://192.168.1.2:5000/api/turfs";
 
 // Fetch all Turfs
 export const getAllTurfs = async () => {
