@@ -40,4 +40,56 @@ const cancelBooking = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getUserBookings, cancelBooking };
+
+const getBookedTimeSlots = async (req, res) => {
+  try {
+    const { turfId, date } = req.query;
+
+    if (!turfId || !date) {
+      return res.status(400).json({ message: "Turf ID and date are required" });
+    }
+
+    const bookings = await Booking.find({ turf: turfId, date });
+
+    // Extract booked time slots from stored time ranges
+    const bookedSlots = new Set();
+
+    bookings.forEach((booking) => {
+      const timeRange = booking.timeSlot;
+      
+      if (timeRange.includes(" - ")) {
+        const [start, end] = timeRange.split(" - ");
+        const allSlots = generateTimeSlots();
+        const startIndex = allSlots.indexOf(start.trim());
+        const endIndex = allSlots.indexOf(end.trim());
+
+        if (startIndex !== -1 && endIndex !== -1) {
+          for (let i = startIndex; i <= endIndex; i++) {
+            bookedSlots.add(allSlots[i]);
+          }
+        }
+      } else {
+        bookedSlots.add(timeRange.trim());
+      }
+    });
+
+    res.json({ bookedSlots: Array.from(bookedSlots) });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Function to generate time slots (same as frontend)
+const generateTimeSlots = () => {
+  const slots = [];
+  let hour = 7;
+  while (hour < 24) {
+    let formattedHour = hour > 12 ? hour - 12 : hour;
+    let ampm = hour >= 12 ? "PM" : "AM";
+    slots.push(`${formattedHour}:00 ${ampm}`);
+    hour++;
+  }
+  return slots;
+};
+
+module.exports = { createBooking, getUserBookings, cancelBooking ,getBookedTimeSlots};

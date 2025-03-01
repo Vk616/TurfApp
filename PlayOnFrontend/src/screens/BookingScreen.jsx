@@ -1,10 +1,11 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AuthContext } from "../context/AuthContext";
-import { createBooking } from "../api/bookingApi";
+import { createBooking, getBookedTimeSlots } from "../api/bookingApi";
+import { Ionicons } from "@expo/vector-icons";
 
-// Generate time slots from 7 AM to 12 AM
+// Function to generate time slots from 7 AM to 12 AM
 const generateTimeSlots = () => {
   const slots = [];
   let hour = 7;
@@ -25,15 +26,34 @@ const BookingScreen = ({ route, navigation }) => {
   const [startTime, setStartTime] = useState(null);
   const [endTimes, setEndTimes] = useState([]);
   const [selectedEndTime, setSelectedEndTime] = useState(null);
+  const [bookedSlots, setBookedSlots] = useState(new Set()); 
 
-  // Handle start time selection
+  useEffect(() => {
+    if (turfId && date) {
+      fetchBookedSlots();
+    }
+  }, [date]);
+
+  const fetchBookedSlots = async () => {
+    try {
+      const response = await getBookedTimeSlots(user.token, turfId, date.toISOString().split("T")[0]);
+      if (response.bookedSlots) {
+        setBookedSlots(new Set(response.bookedSlots));
+      }
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+    }
+  };
+
   const handleStartTimeSelection = (time) => {
     setStartTime(time);
     setSelectedEndTime(null);
+
     const allSlots = generateTimeSlots();
     const startIndex = allSlots.indexOf(time);
     if (startIndex !== -1) {
-      setEndTimes(allSlots.slice(startIndex + 1, startIndex + 4));
+      const availableEndTimes = allSlots.slice(startIndex + 1, startIndex + 4).filter(slot => !bookedSlots.has(slot));
+      setEndTimes(availableEndTimes);
     }
   };
 
@@ -81,14 +101,24 @@ const BookingScreen = ({ route, navigation }) => {
         data={generateTimeSlots()}
         numColumns={3}
         keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.timeSlotButton, startTime === item && styles.selectedTimeSlot]}
-            onPress={() => handleStartTimeSelection(item)}
-          >
-            <Text style={styles.timeSlotText}>{item}</Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          const isBooked = bookedSlots.has(item);
+          return (
+            <TouchableOpacity
+              style={[
+                styles.timeSlotButton,
+                startTime === item && styles.selectedTimeSlot,
+                isBooked && styles.disabledTimeSlot,
+              ]}
+              onPress={() => !isBooked && handleStartTimeSelection(item)}
+              disabled={isBooked}
+            >
+              <Text style={[styles.timeSlotText, isBooked && styles.disabledText]}>
+                {item} {isBooked ? "🚫" : ""}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
       />
 
       {/* End Time Selection */}
@@ -101,7 +131,10 @@ const BookingScreen = ({ route, navigation }) => {
             keyExtractor={(item) => item}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[styles.timeSlotButton, selectedEndTime === item && styles.selectedTimeSlot]}
+                style={[
+                  styles.timeSlotButton,
+                  selectedEndTime === item && styles.selectedTimeSlot,
+                ]}
                 onPress={() => setSelectedEndTime(item)}
               >
                 <Text style={styles.timeSlotText}>{item}</Text>
@@ -119,11 +152,30 @@ const BookingScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
+  subtitle: { fontSize: 18, fontWeight: "600", marginTop: 15, marginBottom: 10 },
   dateButton: { padding: 12, backgroundColor: "#007bff", borderRadius: 8, marginBottom: 15 },
   dateText: { color: "white", fontSize: 16, textAlign: "center" },
-  timeSlotButton: { flex: 1, padding: 10, margin: 5, backgroundColor: "#f0f0f0", borderRadius: 8, alignItems: "center" },
-  selectedTimeSlot: { backgroundColor: "#007bff" },
+  timeSlotButton: {
+    flex: 1,
+    padding: 12,
+    margin: 5,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#007bff",
+  },
+  selectedTimeSlot: { 
+    backgroundColor: "#007bff",
+    borderColor: "#0056b3",
+  },
+  disabledTimeSlot: { 
+    backgroundColor: "#ddd",
+    borderColor: "#aaa",
+  },
   timeSlotText: { fontSize: 16, fontWeight: "500" },
+  disabledText: { color: "#666" },
 });
 
 export default BookingScreen;

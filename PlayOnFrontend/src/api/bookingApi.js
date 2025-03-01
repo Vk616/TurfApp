@@ -17,6 +17,25 @@ export const createBooking = async (token, turfId, date, timeSlot) => {
   }
 };
 
+export const getBookedTimeSlots = async (token, turfId, date) => {
+  const response = await fetch(
+   `${API_URL}/booked-slots?turfId=${turfId}&date=${date}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch booked slots");
+  }
+
+  return await response.json();
+};
+
 // Get User Bookings
 export const getUserBookings = async (token) => {
   try {
