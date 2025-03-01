@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, Button, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Image, Button, StyleSheet, ActivityIndicator, Platform, StatusBar } from "react-native";
 import { getTurfById } from "../api/turfApi";
 import Rating from "../components/Rating";
 
@@ -56,7 +56,12 @@ const TurfDetailsScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    padding: 16, 
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight, // Adjust for notch
+  },
   image: { width: "100%", height: 200, borderRadius: 10 },
   name: { fontSize: 22, fontWeight: "bold", marginTop: 10 },
   location: { fontSize: 16, color: "gray", marginBottom: 10 },

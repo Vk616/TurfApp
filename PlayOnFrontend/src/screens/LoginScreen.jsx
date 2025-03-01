@@ -10,7 +10,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       await login(email, password);
-      navigation.replace("Home");
+      navigation.replace("Main", { screen: "Home" });
     } catch (error) {
       alert("Login Failed: " + error.message);
     }

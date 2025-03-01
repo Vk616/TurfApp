@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import { View, Text, Button, TouchableOpacity, StyleSheet, FlatList, Platform, StatusBar } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AuthContext } from "../context/AuthContext";
 import { createBooking, getBookedTimeSlots } from "../api/bookingApi";
@@ -150,7 +150,12 @@ const BookingScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    padding: 16, 
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight, // Adjust for notch
+  },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
   subtitle: { fontSize: 18, fontWeight: "600", marginTop: 15, marginBottom: 10 },
   dateButton: { padding: 12, backgroundColor: "#007bff", borderRadius: 8, marginBottom: 15 },
