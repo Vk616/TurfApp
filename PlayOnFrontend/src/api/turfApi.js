@@ -1,7 +1,9 @@
 import axios from "axios";
+import Constants from 'expo-constants';
 
+const API = Constants.expoConfig.extra.API_URL;
 // Set the base URL of the backend
-const API_URL = "http://192.168.1.2:5000/api/turfs";
+const API_URL = `${API}api/turfs`;
 
 // Fetch all Turfs
 export const getAllTurfs = async () => {

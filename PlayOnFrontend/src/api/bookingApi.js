@@ -1,7 +1,9 @@
 import axios from "axios";
+import Constants from 'expo-constants';
 
+const API = Constants.expoConfig.extra.API_URL;
 // Set the base URL of the backend
-const API_URL = "http://192.168.1.2:5000/api/bookings";
+const API_URL = `${API}api/bookings`;
 
 // Create a Booking
 export const createBooking = async (token, turfId, date, timeSlot) => {

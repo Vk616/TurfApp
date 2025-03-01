@@ -1,6 +1,8 @@
 import axios from "axios";
+import Constants from 'expo-constants';
 
-const API_URL = "http://192.168.1.2:5000/api/events"; // Update with your backend IP if needed
+const API= Constants.expoConfig.extra.API_URL;
+const API_URL = "${API}api/events"; // Update with your backend IP if needed
 
 export const getAllEvents = async () => {
   try {

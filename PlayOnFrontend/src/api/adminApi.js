@@ -1,6 +1,8 @@
 import axios from "axios";
+import Constants from 'expo-constants';
 
-const API_URL = "http://192.168.1.2:5000/api/admin"; // Change to backend IP if needed
+const API = Constants.expoConfig.extra.API_URL;
+const API_URL = `${API}api/admin`; // Change to backend IP if needed
 
 export const getAllUsers = async (token) => {
   try {
