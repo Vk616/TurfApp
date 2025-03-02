@@ -16,14 +16,32 @@ const EventsScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Upcoming Events</Text>
-      <FlatList data={events} keyExtractor={(item) => item._id} renderItem={({ item }) => <Text>{item.name}</Text>} />
+      <FlatList
+        data={events}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => <Text style={styles.eventText}>{item.name}</Text>}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  header: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#000", // Black background
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#ff0000", // Red text
+  },
+  eventText: {
+    fontSize: 18,
+    color: "#ff4444", // Lighter red text for event names
+    marginVertical: 5,
+  },
 });
 
 export default EventsScreen;
