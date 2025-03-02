@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 
 const SignupScreen = ({ navigation }) => {
@@ -21,23 +21,84 @@ const SignupScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Sign Up</Text>
-      <TextInput style={styles.input} placeholder="Name" onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Email" onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Phone" onChangeText={setPhone} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry onChangeText={setPassword} />
-      <Button title="Sign Up" onPress={handleSignup} />
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        placeholderTextColor="#aaa"
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#aaa"
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Phone"
+        placeholderTextColor="#aaa"
+        onChangeText={setPhone}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#aaa"
+        secureTextEntry
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
       <Text onPress={() => navigation.navigate("Login")} style={styles.link}>
-        Already have an account? Login
+        Already have an account? <Text style={styles.linkHighlight}>Login</Text>
       </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, justifyContent: "center" },
-  header: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 8 },
-  link: { marginTop: 10, color: "blue", textAlign: "center" },
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: "center",
+    backgroundColor: "#111", // Dark background
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#fff", // White text
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ff0000", // Red outline
+    backgroundColor: "#222", // Dark input field
+    padding: 12,
+    marginBottom: 12,
+    borderRadius: 8,
+    color: "#fff", // White text inside input
+  },
+  button: {
+    backgroundColor: "#ff0000", // Red button
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff", // White text on button
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  link: {
+    marginTop: 15,
+    color: "#aaa", // Grey text
+    textAlign: "center",
+  },
+  linkHighlight: {
+    color: "#ff0000", // Red highlight for Login
+    fontWeight: "bold",
+  },
 });
 
 export default SignupScreen;

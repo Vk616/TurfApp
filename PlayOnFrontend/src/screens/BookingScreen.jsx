@@ -144,7 +144,7 @@ const BookingScreen = ({ route, navigation }) => {
         </>
       )}
 
-      <Button title="Confirm Booking" onPress={handleBooking} color="#007bff" />
+      <Button title="Confirm Booking" onPress={handleBooking} color="#ff0000" />
     </View>
   );
 };
@@ -153,34 +153,34 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: "#fff",
-    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight, // Adjust for notch
+    backgroundColor: "#000",
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight, 
   },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 15 },
-  subtitle: { fontSize: 18, fontWeight: "600", marginTop: 15, marginBottom: 10 },
-  dateButton: { padding: 12, backgroundColor: "#007bff", borderRadius: 8, marginBottom: 15 },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 15, color: "#ff0000" },
+  subtitle: { fontSize: 18, fontWeight: "600", marginTop: 15, marginBottom: 10, color: "#ff0000" },
+  dateButton: { padding: 12, backgroundColor: "#ff0000", borderRadius: 8, marginBottom: 15 },
   dateText: { color: "white", fontSize: 16, textAlign: "center" },
   timeSlotButton: {
     flex: 1,
     padding: 12,
     margin: 5,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#222",
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#007bff",
+    borderColor: "#ff0000",
   },
   selectedTimeSlot: { 
-    backgroundColor: "#007bff",
-    borderColor: "#0056b3",
+    backgroundColor: "#ff0000",
+    borderColor: "#900",
   },
   disabledTimeSlot: { 
-    backgroundColor: "#ddd",
-    borderColor: "#aaa",
+    backgroundColor: "#444",
+    borderColor: "#666",
   },
-  timeSlotText: { fontSize: 16, fontWeight: "500" },
-  disabledText: { color: "#666" },
+  timeSlotText: { fontSize: 16, fontWeight: "500", color: "white" },
+  disabledText: { color: "#888" },
 });
 
 export default BookingScreen;
