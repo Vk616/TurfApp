@@ -9,10 +9,35 @@ const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
+
+  const validatePhone = (phone) => {
+    return phone.length === 10 && /^[0-9]+$/.test(phone);
+  };
+
   const handleSignup = async () => {
+    if (!validateEmail(email)) {
+      alert("Invalid email format");
+      return;
+    }
+    if (!validatePassword(password)) {
+      alert("Password must be at least 8 characters long");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      alert("Phone number must be exactly 10 digits");
+      return;
+    }
     try {
       await register(name, email, password, phone);
-      navigation.replace("Home");
+      navigation.replace("Main", { screen: "Home" });
     } catch (error) {
       alert("Signup Failed: " + error.message);
     }
