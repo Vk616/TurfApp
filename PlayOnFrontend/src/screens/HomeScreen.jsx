@@ -5,25 +5,26 @@ import TurfCard from "../components/TurfCard";
 import SearchBar from "../components/SearchBar";
 
 const HomeScreen = ({ navigation }) => {
-  const { turfs, loading} = useContext(TurfContext);
+  const { turfs, loading } = useContext(TurfContext);
   const [searchQuery, setSearchQuery] = useState("");
 
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
-        <Text>Loading Turfs...</Text>
+        <ActivityIndicator size="large" color={styles.loaderColor.color} />
+        <Text style={styles.text}>Loading Turfs...</Text>
       </View>
     );
   }
+
   const filteredTurfs = turfs.filter((turf) =>
     turf.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleTurfPress = (turf) => {
-    navigation.navigate("TurfDetails", { turfId: turf._id });  // Ensure turfId is passed
+    navigation.navigate("TurfDetails", { turfId: turf._id });
   };
-  
+
   return (
     <View style={styles.container}>
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -45,7 +46,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  text: {
+    color: "#ff0000",
+  },
+  loaderColor: {
+    color: "#ff0000",
   },
 });
 

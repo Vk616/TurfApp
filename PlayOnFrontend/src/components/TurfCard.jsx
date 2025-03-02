@@ -16,11 +16,13 @@ const TurfCard = ({ turf, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#222", // Dark background to match HomeScreen
     borderRadius: 10,
     overflow: "hidden",
     marginBottom: 15,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#ff0000", // Red outline
   },
   image: {
     width: "100%",
@@ -32,16 +34,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#fff", // White text for better contrast
   },
   location: {
     fontSize: 14,
-    color: "gray",
+    color: "#bbb", // Grey text for readability
   },
   price: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 5,
-    color: "#007bff",
+    color: "#f5a623", // Light orange for price contrast
   },
 });
 
