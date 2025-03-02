@@ -1,5 +1,7 @@
 const Booking = require("../models/Booking");
-
+const Turf = require("../models/Turf");
+const User = require("../models/User");
+const { sendBookingConfirmation } = require("../services/emailService");
 // Create a Booking
 const createBooking = async (req, res) => {
   try {
@@ -10,9 +12,21 @@ const createBooking = async (req, res) => {
       date,
       timeSlot,
     });
+    // Fetch user email & turf details for email
+    const user = await User.findById(req.user._id);
+    const turf1 = await Turf.findById(turf);
 
+    const bookingDetails = {
+      turfName: turf1.name,
+      date: booking.date,
+      timeSlot: booking.timeSlot,
+    };
+
+    // Send booking confirmation email
+    await sendBookingConfirmation(user.email, bookingDetails);
     res.status(201).json(booking);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
