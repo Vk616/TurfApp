@@ -1,8 +1,5 @@
 import axios from "axios";
-import Constants from 'expo-constants';
-
-const API = Constants.expoConfig.extra.API_URL;
-// Set the base URL of the backend
+const API = process.env.EXPO_PUBLIC_API_URL;
 const API_URL = `${API}api/bookings`;
 
 // Create a Booking

@@ -1,7 +1,5 @@
 import axios from "axios";
-import Constants from 'expo-constants';
-
-const API= Constants.expoConfig.extra.API_URL;
+const API = process.env.EXPO_PUBLIC_API_URL;
 const API_URL = `${API}api/events`; // Update with your backend IP if needed
 
 export const getAllEvents = async () => {

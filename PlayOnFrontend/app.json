@@ -4,28 +4,41 @@
     "slug": "PlayOnFrontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/football.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/football.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/football.png",
+        "backgroundColor": "#ffffff",
+        "package": "com.playon.turfbooking",
+        "versionCode": 1
+      },
+      "package": "com.ciju.PlayOnFrontend"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/football.png"
     },
     "extra": {
-      "API_URL": "http://192.168.2.103:5000/"
-    }
+      "API_URL": "http://4.240.76.224:5000/",
+      "eas": {
+        "projectId": "99b26bfa-720a-4e1c-a078-c475eb3a4f2d"
+      }
+    },
+    "owner": "ciju"
   }
 }
