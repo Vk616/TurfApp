@@ -1,5 +1,7 @@
 import axios from "axios";
-const API = process.env.EXPO_PUBLIC_API_URL;
+import Constants from 'expo-constants';
+
+const API = Constants.expoConfig.extra.API_URL;
 const API_URL = `${API}api/turfs`;
 
 // Fetch all Turfs

@@ -1,24 +1,18 @@
 {
   "cli": {
-    "version": ">= 15.0.12",
+    "version": ">= 15.0.14",
     "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "API_URL": "http://4.240.76.224:5000/"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "API_URL": "http://4.240.76.224:5000/"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {
