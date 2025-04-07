@@ -5,6 +5,7 @@ import TabNavigator from "./TabNavigator";
 import TurfDetailsScreen from "../screens/TurfDetailsScreen";
 import BookingScreen from "../screens/BookingScreen"; // Now exclusively for new bookings
 import { AuthContext } from "../context/AuthContext";
+import PaymentScreen from '../screens/PaymentScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ const AppNavigator = () => {
           <Stack.Screen name="Main" component={TabNavigator} />
           <Stack.Screen name="TurfDetails" component={TurfDetailsScreen} />
           <Stack.Screen name="Booking" component={BookingScreen} /> 
+          <Stack.Screen name="Payment" component={PaymentScreen} />
         </>
       ) : (
         <Stack.Screen name="Auth" component={AuthNavigator} />
