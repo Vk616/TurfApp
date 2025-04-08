@@ -7,6 +7,8 @@ const API_URL = `${API}api/bookings`
 // Create a Booking
 export const createBooking = async (token, turfId, date, startTime, endTime) => {
   try {
+    // This function now understands that endTime represents the start of the last slot,
+    // not including that slot in the booking
     const response = await axios.post(
       API_URL,
       { turf: turfId, date, startTime, endTime },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect, useRef } from "react"
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import { LinearGradient } from "expo-linear-gradient"
 const HomeScreen = ({ navigation }) => {
   const { turfs, loading } = useContext(TurfContext)
   const [searchQuery, setSearchQuery] = useState("")
-  const [scrollY] = useState(new Animated.Value(0))
+  const scrollY = useRef(new Animated.Value(0)).current
   const [categories] = useState([
     { id: "all", name: "All", icon: "football" },
     { id: "football", name: "Football", icon: "football" },
@@ -29,6 +29,13 @@ const HomeScreen = ({ navigation }) => {
     { id: "tennis", name: "Tennis", icon: "tennisball" },
   ])
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const animationInitialized = useRef(false)
+
+  useEffect(() => {
+    if (!animationInitialized.current) {
+      animationInitialized.current = true
+    }
+  }, [])
 
   if (loading) {
     return (

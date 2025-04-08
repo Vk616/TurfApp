@@ -182,7 +182,13 @@ const BookingScreen = ({ route, navigation }) => {
       setBookingLoading(true)
       const formattedDate = date.toISOString().split("T")[0]
 
-      await createBooking(user.token, turfId, formattedDate, selectedStartSlot.startTimeISO, selectedEndSlot.endTimeISO)
+      await createBooking(
+        user.token, 
+        turfId, 
+        formattedDate, 
+        selectedStartSlot.startTimeISO, 
+        selectedEndSlot.startTimeISO
+      )
 
       Alert.alert("Booking Successful", "Your turf has been booked successfully!", [
         {
@@ -330,6 +336,46 @@ const BookingScreen = ({ route, navigation }) => {
     )
   }
 
+  const renderSummary = () => {
+    if (selectedStartSlot && selectedEndSlot) {
+      return (
+        <View style={styles.summaryContainer}>
+          <LinearGradient colors={["rgba(255,85,85,0.1)", "rgba(255,85,85,0.05)"]} style={styles.summaryGradient}>
+            <Text style={styles.summaryTitle}>Booking Summary</Text>
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Date:</Text>
+              <Text style={styles.summaryValue}>{date.toDateString()}</Text>
+            </View>
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Time:</Text>
+              <Text style={styles.summaryValue}>
+                {selectedStartSlot.displayTime} - {selectedEndSlot.displayTime}
+              </Text>
+            </View>
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Duration:</Text>
+              <Text style={styles.summaryValue}>
+                {Math.round(
+                  (new Date(selectedEndSlot.startTimeISO) - new Date(selectedStartSlot.startTimeISO)) /
+                    (60 * 60 * 1000),
+                )}{" "}
+                hours
+              </Text>
+            </View>
+            
+            <Text style={styles.summaryNote}>
+              Note: The ending time slot ({selectedEndSlot.displayTime}) is not included in your booking.
+            </Text>
+          </LinearGradient>
+        </View>
+      );
+    }
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -397,36 +443,7 @@ const BookingScreen = ({ route, navigation }) => {
               {renderTimeSlots()}
             </View>
 
-            {selectedStartSlot && selectedEndSlot && (
-              <View style={styles.summaryContainer}>
-                <LinearGradient colors={["rgba(255,85,85,0.1)", "rgba(255,85,85,0.05)"]} style={styles.summaryGradient}>
-                  <Text style={styles.summaryTitle}>Booking Summary</Text>
-
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Date:</Text>
-                    <Text style={styles.summaryValue}>{date.toDateString()}</Text>
-                  </View>
-
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Time:</Text>
-                    <Text style={styles.summaryValue}>
-                      {selectedStartSlot.displayTime} - {selectedEndSlot.displayTime}
-                    </Text>
-                  </View>
-
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Duration:</Text>
-                    <Text style={styles.summaryValue}>
-                      {Math.round(
-                        (new Date(selectedEndSlot.startTimeISO) - new Date(selectedStartSlot.startTimeISO)) /
-                          (60 * 60 * 1000),
-                      )}{" "}
-                      hours
-                    </Text>
-                  </View>
-                </LinearGradient>
-              </View>
-            )}
+            {renderSummary()}
           </>
         )}
       </ScrollView>
@@ -733,6 +750,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "500",
+  },
+  summaryNote: {
+    color: "#ff5555",
+    fontSize: 13,
+    marginTop: 15,
+    fontStyle: "italic",
+    textAlign: "center",
   },
   bottomBar: {
     position: "absolute",
