@@ -8,9 +8,12 @@ const TurfSchema = new mongoose.Schema(
     description: { type: String },
     pricePerHour: { type: Number, required: true },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Turf owner (Admin)
-    availability: { type: [String], default: [] }, // Available time slots
-    rating: { type: Number, default: 0 },
-    totalReviews: { type: Number, default: 0 },
+    availability: [
+      {
+        start: { type: Date, required: true },
+        end: { type: Date, required: true }
+      }
+    ], // Available time slots as Date objects
   },
   { timestamps: true }
 );

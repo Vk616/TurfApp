@@ -14,7 +14,6 @@ import {
   Dimensions,
 } from "react-native"
 import { getTurfById } from "../api/turfApi"
-import Rating from "../components/Rating"
 import Button from "../components/Button"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
@@ -117,10 +116,6 @@ const TurfDetailsScreen = ({ route, navigation }) => {
                 <Ionicons name="location" size={16} color="#ff5555" />
                 <Text style={styles.location}>{turf.location}</Text>
               </View>
-            </View>
-            <View style={styles.ratingContainer}>
-              <Rating rating={turf.rating || 4.5} />
-              <Text style={styles.reviewCount}>(24 reviews)</Text>
             </View>
           </View>
 
@@ -290,14 +285,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#bbb",
     marginLeft: 5,
-  },
-  ratingContainer: {
-    alignItems: "flex-end",
-  },
-  reviewCount: {
-    color: "#aaa",
-    fontSize: 12,
-    marginTop: 2,
   },
   priceCard: {
     backgroundColor: "#222",

@@ -34,6 +34,9 @@ const createBooking = async (req, res) => {
   try {
     const { turf: turfId, date, startTime, endTime } = req.body
 
+    // Convert string date to Date object if needed
+    const bookingDate = new Date(date)
+    
     // Convert string times to Date objects
     const startDateTime = new Date(startTime)
     const endDateTime = new Date(endTime)
@@ -53,7 +56,7 @@ const createBooking = async (req, res) => {
     const booking = await Booking.create({
       user: req.user._id,
       turf: turfId,
-      date,
+      date: bookingDate,
       startTime: startDateTime,
       endTime: endDateTime,
       // For backward compatibility
@@ -66,7 +69,7 @@ const createBooking = async (req, res) => {
 
     const bookingDetails = {
       turfName: turf.name,
-      date: booking.date,
+      date: bookingDate.toISOString().split('T')[0],
       timeSlot: booking.timeSlot,
     }
 

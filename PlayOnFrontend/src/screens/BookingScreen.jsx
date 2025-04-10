@@ -66,15 +66,39 @@ const BookingScreen = ({ route, navigation }) => {
       setSelectedEndSlot(null)
       setShowEndTimeModal(false)
 
+      // Format date as ISO string without time component for API
       const formattedDate = date.toISOString().split("T")[0]
       const response = await getAvailableTimeSlots(user.token, turfId, formattedDate)
-      setAvailableSlots(response.availableSlots)
+      
+      // Process slots to mark past slots as unavailable for today
+      const processedSlots = markPastSlotsAsUnavailable(response.availableSlots, date)
+      setAvailableSlots(processedSlots)
     } catch (error) {
       console.error("Error fetching available slots:", error)
       setError("Failed to load available time slots. Please try again.")
     } finally {
       setLoading(false)
     }
+  }
+  
+  // Helper function to mark past time slots as unavailable
+  const markPastSlotsAsUnavailable = (slots, selectedDate) => {
+    const now = new Date()
+    const isToday = selectedDate.toDateString() === now.toDateString()
+    
+    if (!isToday) {
+      // If not today, return slots as they are
+      return slots
+    }
+    
+    // If it's today, mark past slots as unavailable
+    return slots.map(slot => {
+      const slotTime = new Date(slot.startTimeISO)
+      if (slotTime <= now) {
+        return { ...slot, isAvailable: false }
+      }
+      return slot
+    })
   }
 
   const handleDateChange = (event, selectedDate) => {

@@ -7,12 +7,11 @@ const router = express.Router();
 // Add a Review
 router.post("/", protect, async (req, res) => {
   try {
-    const { turf, rating, comment } = req.body;
+    const { turf, comment } = req.body;
 
     const review = await Review.create({
       user: req.user._id,
       turf,
-      rating,
       comment,
     });
 

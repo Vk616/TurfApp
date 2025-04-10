@@ -111,6 +111,11 @@ const BookingHistoryScreen = () => {
           refreshing={refreshing}
           onRefresh={handleRefresh}
           renderItem={({ item }) => {
+            // Skip rendering if item.turf is null/undefined
+            if (!item.turf) {
+              return null;
+            }
+            
             const statusStyle = getStatusColor(item.date, item.timeSlot)
 
             return (
@@ -129,14 +134,14 @@ const BookingHistoryScreen = () => {
                     <Image
                       source={{
                         uri:
-                          item.turf.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1000",
+                          (item.turf && item.turf.image) || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1000",
                       }}
                       style={styles.turfImage}
                     />
                   </View>
 
                   <View style={styles.bookingDetails}>
-                    <Text style={styles.turfName}>{item.turf.name}</Text>
+                    <Text style={styles.turfName}>{item.turf ? item.turf.name : "Unknown Turf"}</Text>
 
                     <View style={styles.detailRow}>
                       <Ionicons name="calendar-outline" size={16} color="#ff5555" style={styles.detailIcon} />
@@ -150,7 +155,7 @@ const BookingHistoryScreen = () => {
 
                     <View style={styles.detailRow}>
                       <Ionicons name="location-outline" size={16} color="#ff5555" style={styles.detailIcon} />
-                      <Text style={styles.detailText}>{item.turf.location}</Text>
+                      <Text style={styles.detailText}>{item.turf ? item.turf.location : "Unknown Location"}</Text>
                     </View>
                   </View>
                 </View>

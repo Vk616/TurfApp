@@ -22,10 +22,6 @@ const TurfCard = ({ turf, onPress }) => {
               <Text style={styles.perHour}>/hr</Text>
             </View>
           </View>
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingText}>{turf.rating || 4.5}</Text>
-            <Ionicons name="star" size={12} color="#FFD700" />
-          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -102,21 +98,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#aaa",
     marginLeft: 2,
-  },
-  ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#FFD700",
-    marginRight: 2,
-  },
+  }
 })
 
 export default TurfCard

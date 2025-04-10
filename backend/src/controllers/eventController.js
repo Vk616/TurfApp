@@ -4,9 +4,13 @@ const Event = require("../models/Event");
 const createEvent = async (req, res) => {
   try {
     const { name, date, time, location, description } = req.body;
+    
+    // Convert date string to Date object if needed
+    const eventDate = new Date(date);
+    
     const event = await Event.create({
       name,
-      date,
+      date: eventDate,
       time,
       location,
       organizer: req.user._id,

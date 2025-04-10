@@ -8,13 +8,30 @@ dotenv.config();
 // **Function to Generate Time Slots (7 AM - 11 PM)**
 const generateTimeSlots = () => {
   const slots = [];
-  let hour = 7; // Start time
-  while (hour < 23) { // End time is 11 PM (23:00)
-    let formattedHour = hour > 12 ? hour - 12 : hour;
-    let ampm = hour >= 12 ? "PM" : "AM";
-    slots.push(`${formattedHour}:00 ${ampm} - ${formattedHour + 1}:00 ${ampm}`);
-    hour++;
+  // Get current date as base
+  const baseDate = new Date();
+  baseDate.setHours(0, 0, 0, 0); // Reset time to start of day
+  
+  // Generate slots for next 7 days
+  for (let day = 0; day < 7; day++) {
+    const currentDate = new Date(baseDate);
+    currentDate.setDate(currentDate.getDate() + day);
+    
+    // Generate hourly slots from 7 AM to 11 PM
+    for (let hour = 7; hour < 23; hour++) {
+      const startTime = new Date(currentDate);
+      startTime.setHours(hour, 0, 0, 0);
+      
+      const endTime = new Date(currentDate);
+      endTime.setHours(hour + 1, 0, 0, 0);
+      
+      slots.push({
+        start: startTime,
+        end: endTime
+      });
+    }
   }
+  
   return slots;
 };
 
@@ -104,8 +121,6 @@ const seedDatabase = async () => {
       ...turf,
       owner: adminUser._id, // Assigning an admin as the turf owner
       availability: generateTimeSlots(),
-      rating: Math.floor(Math.random() * 5) + 1,
-      totalReviews: Math.floor(Math.random() * 100),
     }));
 
     await Turf.insertMany(turfsWithSlots);
