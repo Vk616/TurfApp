@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Turf = require("../models/Turf");
 
 const protect = async (req, res, next) => {
   let token;
@@ -37,4 +38,33 @@ const turfOwner = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin, turfOwner };
+// Middleware to check if a user is the owner of a specific turf
+const isTurfOwner = async (req, res, next) => {
+  try {
+    const turfId = req.params.id;
+    
+    // Skip check for admins (they can edit any turf)
+    if (req.user && req.user.role === "admin") {
+      return next();
+    }
+    
+    // For turf owners, check if they own this specific turf
+    if (req.user) {
+      const turf = await Turf.findById(turfId);
+      
+      if (!turf) {
+        return res.status(404).json({ message: "Turf not found" });
+      }
+      
+      if (turf.owner.toString() === req.user._id.toString()) {
+        return next();
+      }
+    }
+    
+    res.status(403).json({ message: "Not authorized to modify this turf" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { protect, admin, turfOwner, isTurfOwner };

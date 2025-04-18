@@ -1,4 +1,5 @@
 const Turf = require("../models/Turf");
+const { uploadImage, uploadMultipleImages, deleteImage } = require("../config/cloudinaryConfig");
 
 // Validate availability slots
 const validateAvailabilitySlots = (slots) => {
@@ -45,40 +46,78 @@ const validateAvailabilitySlots = (slots) => {
   return { valid: true };
 };
 
-// Create Turf (Admin Only)
+// Create Turf
 const createTurf = async (req, res) => {
   try {
-    const { name, location, pricePerHour, description, availability } = req.body;
-    const image = req.file ? req.file.path : null;
+    const { name, location, pricePerHour, description, amenities, customAmenities } = req.body;
     
-    // Validate availability if provided
-    if (availability) {
-      const validationResult = validateAvailabilitySlots(availability);
-      if (!validationResult.valid) {
-        return res.status(400).json({ message: validationResult.message });
+    // Process images from multer
+    let mainImageUrl = null;
+    let additionalImageUrls = [];
+    
+    // Handle main image
+    if (req.files && req.files.image && req.files.image.length > 0) {
+      mainImageUrl = req.files.image[0].path;
+    }
+    
+    // Handle additional images
+    if (req.files && req.files.additionalImages && req.files.additionalImages.length > 0) {
+      additionalImageUrls = req.files.additionalImages.map(file => file.path);
+    }
+    
+    // Parse amenities if provided
+    let amenitiesObj = {
+      water: true,
+      parking: true,
+      floodlights: true,
+      changingRoom: true,
+      beverages: false,
+      equipment: false
+    };
+    
+    if (amenities) {
+      try {
+        const parsedAmenities = JSON.parse(amenities);
+        amenitiesObj = { ...amenitiesObj, ...parsedAmenities };
+      } catch (error) {
+        console.error("Error parsing amenities:", error);
       }
     }
-
-    const turf = await Turf.create({
+    
+    // Parse custom amenities if provided
+    let customAmenitiesArr = [];
+    if (customAmenities) {
+      try {
+        customAmenitiesArr = JSON.parse(customAmenities);
+      } catch (error) {
+        console.error("Error parsing custom amenities:", error);
+      }
+    }
+    
+    // Create the turf
+    const newTurf = await Turf.create({
       name,
       location,
-      image,
-      pricePerHour,
+      image: mainImageUrl,
+      images: additionalImageUrls,
       description,
+      pricePerHour: Number(pricePerHour),
       owner: req.user._id,
-      availability: availability || [],
+      amenities: amenitiesObj,
+      customAmenities: customAmenitiesArr
     });
-
-    res.status(201).json(turf);
+    
+    res.status(201).json(newTurf);
   } catch (error) {
+    console.error("Error creating turf:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get All Turfs
+// Get all Turfs
 const getAllTurfs = async (req, res) => {
   try {
-    const turfs = await Turf.find();
+    const turfs = await Turf.find().sort({ createdAt: -1 });
     res.json(turfs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,10 +128,97 @@ const getAllTurfs = async (req, res) => {
 const getTurfById = async (req, res) => {
   try {
     const turf = await Turf.findById(req.params.id);
-    if (!turf) return res.status(404).json({ message: "Turf not found" });
-
+    if (!turf) {
+      return res.status(404).json({ message: "Turf not found" });
+    }
     res.json(turf);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update Turf details
+const updateTurf = async (req, res) => {
+  try {
+    const { 
+      name, location, pricePerHour, description, 
+      amenities, customAmenities, removeImages 
+    } = req.body;
+    
+    const turfId = req.params.id;
+    const turf = await Turf.findById(turfId);
+    
+    if (!turf) {
+      return res.status(404).json({ message: "Turf not found" });
+    }
+    
+    // Check if user is authorized (admin or turf owner)
+    if (req.user.role !== "admin" && turf.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to update this turf" });
+    }
+    
+    // Update basic fields if provided
+    if (name) turf.name = name;
+    if (location) turf.location = location;
+    if (pricePerHour) turf.pricePerHour = Number(pricePerHour);
+    if (description) turf.description = description;
+    
+    // Handle main image update
+    if (req.files && req.files.image && req.files.image.length > 0) {
+      // Delete old image if exists
+      if (turf.image) {
+        await deleteImage(turf.image);
+      }
+      turf.image = req.files.image[0].path;
+    }
+    
+    // Handle additional images
+    if (req.files && req.files.additionalImages && req.files.additionalImages.length > 0) {
+      const newImageUrls = req.files.additionalImages.map(file => file.path);
+      turf.images = [...(turf.images || []), ...newImageUrls];
+    }
+    
+    // Handle image removals
+    if (removeImages) {
+      try {
+        const imagesToRemove = JSON.parse(removeImages);
+        
+        // Delete each image from Cloudinary
+        for (const imageUrl of imagesToRemove) {
+          await deleteImage(imageUrl);
+        }
+        
+        // Remove from turf.images array
+        turf.images = turf.images.filter(img => !imagesToRemove.includes(img));
+      } catch (error) {
+        console.error("Error processing image removals:", error);
+      }
+    }
+    
+    // Update amenities if provided
+    if (amenities) {
+      try {
+        const parsedAmenities = JSON.parse(amenities);
+        turf.amenities = { ...turf.amenities, ...parsedAmenities };
+      } catch (error) {
+        console.error("Error parsing amenities:", error);
+      }
+    }
+    
+    // Update custom amenities if provided
+    if (customAmenities) {
+      try {
+        turf.customAmenities = JSON.parse(customAmenities);
+      } catch (error) {
+        console.error("Error parsing custom amenities:", error);
+      }
+    }
+    
+    // Save the updated turf
+    const updatedTurf = await turf.save();
+    res.json(updatedTurf);
+  } catch (error) {
+    console.error("Error updating turf:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -101,49 +227,67 @@ const getTurfById = async (req, res) => {
 const updateTurfAvailability = async (req, res) => {
   try {
     const { availability } = req.body;
-    const { id } = req.params;
+    const turfId = req.params.id;
     
-    // Validate the provided availability slots
-    const validationResult = validateAvailabilitySlots(availability);
-    if (!validationResult.valid) {
-      return res.status(400).json({ message: validationResult.message });
+    const turf = await Turf.findById(turfId);
+    if (!turf) {
+      return res.status(404).json({ message: "Turf not found" });
     }
     
-    const turf = await Turf.findById(id);
-    if (!turf) return res.status(404).json({ message: "Turf not found" });
-    
-    // Ensure the current user is the turf owner
-    if (turf.owner.toString() !== req.user._id.toString()) {
+    // Check if user is authorized (admin or turf owner)
+    if (req.user.role !== "admin" && turf.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized to update this turf" });
     }
     
     turf.availability = availability;
-    await turf.save();
+    const updatedTurf = await turf.save();
     
-    res.json(turf);
+    res.json(updatedTurf);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Delete Turf (Admin Only)
+// Delete Turf
 const deleteTurf = async (req, res) => {
   try {
     const turf = await Turf.findById(req.params.id);
-    if (!turf) return res.status(404).json({ message: "Turf not found" });
-
+    
+    if (!turf) {
+      return res.status(404).json({ message: "Turf not found" });
+    }
+    
+    // Check if user is authorized (admin or turf owner)
+    if (req.user.role !== "admin" && turf.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this turf" });
+    }
+    
+    // Delete images from Cloudinary
+    if (turf.image) {
+      await deleteImage(turf.image);
+    }
+    
+    if (turf.images && turf.images.length > 0) {
+      for (const imageUrl of turf.images) {
+        await deleteImage(imageUrl);
+      }
+    }
+    
+    // Delete the turf
     await turf.deleteOne();
+    
     res.json({ message: "Turf deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { 
-  createTurf, 
-  getAllTurfs, 
-  getTurfById, 
-  deleteTurf,
+module.exports = {
+  createTurf,
+  getAllTurfs,
+  getTurfById,
+  updateTurf,
   updateTurfAvailability,
+  deleteTurf,
   validateAvailabilitySlots
 };

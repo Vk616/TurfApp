@@ -39,6 +39,36 @@ export const createTurf = async (token, formData) => {
   }
 };
 
+// Update Turf Details
+export const updateTurf = async (token, turfId, formData) => {
+  try {
+    const response = await axios.put(`${API_URL}/${turfId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+// Update Turf Availability
+export const updateTurfAvailability = async (token, turfId, availability) => {
+  try {
+    const response = await axios.put(`${API_URL}/${turfId}/availability`, { availability }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
 // Delete Turf (Admin Only)
 export const deleteTurf = async (token, turfId) => {
   try {

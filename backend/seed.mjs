@@ -128,10 +128,29 @@ const seedDatabase = async () => {
       console.log("✅ Admin user already exists");
     }
 
-    // **Insert Turfs with Generated Time Slots**
-    const turfsWithSlots = turfs.map((turf) => ({
+    // Create Turf Owner User if not exists
+    let turfOwnerUser = await User.findOne({ email: "turfowner@playonturf.com" });
+    if (!turfOwnerUser) {
+      console.log("🔧 Creating turf owner user...");
+      
+      turfOwnerUser = await User.create({
+        name: "Turf Owner",
+        email: "turfowner@playonturf.com",
+        password: "turfowner123", // Will be hashed by the User model
+        phone: "9876543210",
+        role: "turf_owner"
+      });
+      console.log(`✅ Turf owner created with email: ${turfOwnerUser.email} and password: turfowner123`);
+    } else {
+      console.log("✅ Turf owner already exists");
+    }
+
+    // Assign some turfs to the turf owner
+    // You can modify this as needed
+    const turfsWithSlots = turfs.map((turf, index) => ({
       ...turf,
-      owner: adminUser._id, // Assigning an admin as the turf owner
+      // Example: Assign odd-indexed turfs to turf owner
+      owner: index % 2 === 0 ? adminUser._id : turfOwnerUser._id,
       availability: generateTimeSlots(),
     }));
 

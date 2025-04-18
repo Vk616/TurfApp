@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, useRef } from "react"
 import {
   View,
   Text,
@@ -12,35 +12,38 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Alert,
+  FlatList,
 } from "react-native"
 import { getTurfById } from "../api/turfApi"
 import Button from "../components/Button"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { ThemeContext } from "../context/ThemeContext"
+import { AuthContext } from "../context/AuthContext"
 
 const { width } = Dimensions.get("window")
 
 const TurfDetailsScreen = ({ route, navigation }) => {
   const { theme, darkMode } = useContext(ThemeContext)
+  const { user } = useContext(AuthContext)
   const { turfId } = route.params || {}
   const [turf, setTurf] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedImage, setSelectedImage] = useState(0)
-
-  // Mock additional images for demo purposes
-  const additionalImages = [
-    "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1000",
-    "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=1000",
-    "https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1000",
-  ]
+  const [isOwner, setIsOwner] = useState(false)
+  const flatListRef = useRef(null)
 
   useEffect(() => {
     async function fetchTurf() {
       try {
         const data = await getTurfById(turfId)
         setTurf(data)
+        // Check if the current user is the owner of this turf
+        if (user && data.owner && user._id === data.owner) {
+          setIsOwner(true)
+        }
       } catch (err) {
         console.error("Error fetching turf details:", err)
         setError("Failed to load turf details.")
@@ -54,7 +57,29 @@ const TurfDetailsScreen = ({ route, navigation }) => {
       setError("Invalid Turf ID")
       setLoading(false)
     }
-  }, [turfId])
+  }, [turfId, user])
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (turfId) {
+        setLoading(true)
+        getTurfById(turfId)
+          .then(data => {
+            setTurf(data)
+            // Recheck ownership
+            if (user && data.owner && user._id === data.owner) {
+              setIsOwner(true)
+            }
+          })
+          .catch(err => {
+            console.error("Error refreshing turf details:", err)
+          })
+          .finally(() => setLoading(false))
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, turfId, user])
 
   if (loading) {
     return (
@@ -83,33 +108,157 @@ const TurfDetailsScreen = ({ route, navigation }) => {
     )
   }
 
-  const allImages = [turf.image, ...additionalImages]
+  const allImages = [
+    turf.image, 
+    ...(turf.images && turf.images.length > 0 ? turf.images : [])
+  ].filter(Boolean)
+
+  if (allImages.length === 0) {
+    allImages.push(
+      "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1000",
+      "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=1000",
+      "https://images.unsplash.com/photo-1624880357913-a8539238245b?q=80&w=1000"
+    )
+  }
+
+  const handleEditPress = () => {
+    if (isOwner || user?.role === 'admin') {
+      navigation.navigate("TurfEdit", { turf })
+    } else {
+      Alert.alert("Not Authorized", "Only turf owners can edit turf details.")
+    }
+  }
+
+  const renderAmenities = () => {
+    const amenityIcons = {
+      water: "water-outline",
+      parking: "car-outline",
+      floodlights: "flash-outline",
+      changingRoom: "shirt-outline",
+      beverages: "cafe-outline",
+      equipment: "football-outline"
+    }
+    
+    const amenitiesArray = turf.amenities 
+      ? Object.entries(turf.amenities)
+          .filter(([_, value]) => value === true)
+          .map(([key]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+            icon: amenityIcons[key] || "checkmark-circle-outline"
+          }))
+      : []
+    
+    const customAmenitiesArray = turf.customAmenities && turf.customAmenities.length > 0
+      ? turf.customAmenities
+          .filter(amenity => amenity.available)
+          .map(amenity => ({
+            name: amenity.name,
+            icon: amenity.icon || "star-outline"
+          }))
+      : []
+    
+    const allAmenities = [...amenitiesArray, ...customAmenitiesArray]
+    
+    return (
+      <View style={styles.amenitiesContainer}>
+        {allAmenities.map((amenity, index) => (
+          <View key={index} style={styles.amenityItem}>
+            <Ionicons name={amenity.icon} size={24} color={theme.primary} />
+            <Text style={[styles.amenityText, { color: theme.placeholder }]}>{amenity.name}</Text>
+          </View>
+        ))}
+      </View>
+    )
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Main Image with Gradient Overlay */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: allImages[selectedImage] }} style={styles.mainImage} />
-          <LinearGradient colors={["transparent", "rgba(0,0,0,0.8)"]} style={styles.imageGradient} />
+          <FlatList
+            ref={flatListRef}
+            data={allImages}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            onMomentumScrollEnd={(e) => {
+              const contentOffset = e.nativeEvent.contentOffset;
+              const viewSize = e.nativeEvent.layoutMeasurement;
+              const newIndex = Math.floor(contentOffset.x / viewSize.width);
+              setSelectedImage(newIndex);
+            }}
+            renderItem={({ item }) => (
+              <View style={styles.imageWrapper}>
+                <Image source={{ uri: item }} style={styles.mainImage} />
+                <LinearGradient colors={["transparent", "rgba(0,0,0,0.8)"]} style={styles.imageGradient} />
+              </View>
+            )}
+          />
+          
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
+
+          {(isOwner || user?.role === 'admin') && (
+            <TouchableOpacity style={styles.editButton} onPress={handleEditPress}>
+              <Ionicons name="create-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          {allImages.length > 1 && (
+            <>
+              <TouchableOpacity 
+                style={[styles.navArrow, styles.leftArrow]}
+                onPress={() => {
+                  if (selectedImage > 0) {
+                    setSelectedImage(selectedImage - 1);
+                    flatListRef.current?.scrollToIndex({
+                      index: selectedImage - 1,
+                      animated: true
+                    });
+                  }
+                }}
+              >
+                <Ionicons name="chevron-back" size={24} color="#fff" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.navArrow, styles.rightArrow]}
+                onPress={() => {
+                  if (selectedImage < allImages.length - 1) {
+                    setSelectedImage(selectedImage + 1);
+                    flatListRef.current?.scrollToIndex({
+                      index: selectedImage + 1,
+                      animated: true
+                    });
+                  }
+                }}
+              >
+                <Ionicons name="chevron-forward" size={24} color="#fff" />
+              </TouchableOpacity>
+            </>
+          )}
 
           <View style={styles.imageIndicators}>
             {allImages.map((_, index) => (
               <TouchableOpacity
                 key={index}
                 style={[styles.indicator, selectedImage === index && styles.activeIndicator]}
-                onPress={() => setSelectedImage(index)}
+                onPress={() => {
+                  setSelectedImage(index);
+                  flatListRef.current?.scrollToIndex({
+                    index: index,
+                    animated: true
+                  });
+                }}
               />
             ))}
           </View>
         </View>
 
-        {/* Turf Details */}
         <View style={styles.detailsContainer}>
           <View style={styles.headerRow}>
             <View>
@@ -144,24 +293,7 @@ const TurfDetailsScreen = ({ route, navigation }) => {
 
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Amenities</Text>
-            <View style={styles.amenitiesContainer}>
-              <View style={styles.amenityItem}>
-                <Ionicons name="water-outline" size={24} color={theme.primary} />
-                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Water</Text>
-              </View>
-              <View style={styles.amenityItem}>
-                <Ionicons name="car-outline" size={24} color={theme.primary} />
-                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Parking</Text>
-              </View>
-              <View style={styles.amenityItem}>
-                <Ionicons name="flash-outline" size={24} color={theme.primary} />
-                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Floodlights</Text>
-              </View>
-              <View style={styles.amenityItem}>
-                <Ionicons name="shirt-outline" size={24} color={theme.primary} />
-                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Changing Room</Text>
-              </View>
-            </View>
+            {renderAmenities()}
           </View>
 
           <View style={styles.section}>
@@ -217,9 +349,14 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 300,
   },
+  imageWrapper: {
+    width: Dimensions.get('window').width,
+    height: 300,
+  },
   mainImage: {
     width: "100%",
     height: 300,
+    resizeMode: 'cover',
   },
   imageGradient: {
     position: "absolute",
@@ -238,6 +375,35 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
+  },
+  editButton: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 50 : 30,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  navArrow: {
+    position: "absolute",
+    top: '50%',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: -20,
+    zIndex: 10,
+  },
+  leftArrow: {
+    left: 10,
+  },
+  rightArrow: {
+    right: 10,
   },
   imageIndicators: {
     position: "absolute",
