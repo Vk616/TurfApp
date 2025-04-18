@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, StatusBar } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
+import { ThemeContext } from "../context/ThemeContext"
 
 // Mock notifications data
 const mockNotifications = [
@@ -42,6 +43,7 @@ const mockNotifications = [
 ]
 
 const NotificationsScreen = () => {
+  const { theme, darkMode } = useContext(ThemeContext)
   const [notifications, setNotifications] = useState(mockNotifications)
 
   const markAsRead = (id) => {
@@ -71,51 +73,58 @@ const NotificationsScreen = () => {
 
   const renderNotificationItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.notificationItem, !item.read && styles.unreadNotification]}
+      style={[
+        styles.notificationItem,
+        { backgroundColor: theme.cardBackground, borderColor: theme.border },
+        !item.read && { backgroundColor: theme.overlay, borderColor: theme.primary },
+      ]}
       onPress={() => markAsRead(item.id)}
     >
       <View style={[styles.iconContainer, { backgroundColor: getIconBackground(item.type) }]}>
-        <Ionicons name={getNotificationIcon(item.type)} size={22} color="#fff" />
+        <Ionicons name={getNotificationIcon(item.type)} size={22} color={theme.text} />
       </View>
 
       <View style={styles.notificationContent}>
         <View style={styles.notificationHeader}>
-          <Text style={styles.notificationTitle}>{item.title}</Text>
-          <Text style={styles.notificationTime}>{item.time}</Text>
+          <Text style={[styles.notificationTitle, { color: theme.text }]}>{item.title}</Text>
+          <Text style={[styles.notificationTime, { color: theme.placeholder }]}>{item.time}</Text>
         </View>
-        <Text style={styles.notificationMessage}>{item.message}</Text>
+        <Text style={[styles.notificationMessage, { color: theme.placeholder }]}>{item.message}</Text>
       </View>
 
-      {!item.read && <View style={styles.unreadDot} />}
+      {!item.read && <View style={[styles.unreadDot, { backgroundColor: theme.primary }]} />}
     </TouchableOpacity>
   )
 
   const getIconBackground = (type) => {
     switch (type) {
       case "booking":
-        return "#ff5555"
+        return theme.danger
       case "promo":
-        return "#33cc33"
+        return theme.accent
       case "reminder":
-        return "#3366ff"
+        return theme.info
       case "system":
-        return "#ff9933"
+        return theme.warning
       default:
-        return "#888"
+        return theme.secondary
     }
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
-      <LinearGradient colors={["#111", "#000"]} style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
+      <LinearGradient
+        colors={[theme.headerBackground, theme.background]}
+        style={styles.header}
+      >
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Notifications</Text>
         {unreadCount > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadBadgeText}>{unreadCount} new</Text>
+          <View style={[styles.unreadBadge, { backgroundColor: theme.primary }]}>
+            <Text style={[styles.unreadBadgeText, { color: theme.text }]}>{unreadCount} new</Text>
           </View>
         )}
       </LinearGradient>
@@ -127,11 +136,14 @@ const NotificationsScreen = () => {
               style={styles.actionButton}
               onPress={() => setNotifications(notifications.map((n) => ({ ...n, read: true })))}
             >
-              <Text style={styles.actionButtonText}>Mark all as read</Text>
+              <Text style={[styles.actionButtonText, { color: theme.primary }]}>Mark all as read</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.actionButton, styles.clearButton]} onPress={clearAllNotifications}>
-              <Text style={styles.actionButtonText}>Clear all</Text>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: theme.overlay, borderRadius: 8 }]}
+              onPress={clearAllNotifications}
+            >
+              <Text style={[styles.actionButtonText, { color: theme.primary }]}>Clear all</Text>
             </TouchableOpacity>
           </View>
 
@@ -145,9 +157,9 @@ const NotificationsScreen = () => {
         </>
       ) : (
         <View style={styles.emptyContainer}>
-          <Ionicons name="notifications-off-outline" size={80} color="#ff5555" />
-          <Text style={styles.emptyText}>No notifications</Text>
-          <Text style={styles.emptySubtext}>You're all caught up!</Text>
+          <Ionicons name="notifications-off-outline" size={80} color={theme.primary} />
+          <Text style={[styles.emptyText, { color: theme.text }]}>No notifications</Text>
+          <Text style={[styles.emptySubtext, { color: theme.placeholder }]}>You're all caught up!</Text>
         </View>
       )}
     </View>
@@ -157,7 +169,6 @@ const NotificationsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     paddingTop: 50,
@@ -170,16 +181,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
   },
   unreadBadge: {
-    backgroundColor: "#ff5555",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
   },
   unreadBadgeText: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -193,12 +201,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
-  clearButton: {
-    backgroundColor: "rgba(255, 85, 85, 0.1)",
-    borderRadius: 8,
-  },
   actionButtonText: {
-    color: "#ff5555",
     fontSize: 14,
   },
   notificationsList: {
@@ -206,17 +209,11 @@ const styles = StyleSheet.create({
   },
   notificationItem: {
     flexDirection: "row",
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
     position: "relative",
-  },
-  unreadNotification: {
-    backgroundColor: "rgba(255, 85, 85, 0.05)",
-    borderColor: "rgba(255, 85, 85, 0.3)",
   },
   iconContainer: {
     width: 44,
@@ -237,15 +234,12 @@ const styles = StyleSheet.create({
   notificationTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
   },
   notificationTime: {
     fontSize: 12,
-    color: "#aaa",
   },
   notificationMessage: {
     fontSize: 14,
-    color: "#bbb",
     lineHeight: 20,
   },
   unreadDot: {
@@ -255,7 +249,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ff5555",
   },
   emptyContainer: {
     flex: 1,
@@ -265,13 +258,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
-    color: "#fff",
     marginTop: 20,
     fontWeight: "bold",
   },
   emptySubtext: {
     fontSize: 16,
-    color: "#aaa",
     marginTop: 10,
   },
 })

@@ -3,11 +3,13 @@
 import { useEffect, useState, useContext } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Alert } from "react-native"
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { getAllUsers, getAllBookings, getAllTurfs, getDashboardStats, updateBookingStatus, deleteBooking, deleteUser } from "../api/adminApi"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 
 const AdminDashboardScreen = () => {
+  const { theme, darkMode } = useContext(ThemeContext)
   const { user } = useContext(AuthContext)
   const [users, setUsers] = useState([])
   const [bookings, setBookings] = useState([])
@@ -85,16 +87,16 @@ const AdminDashboardScreen = () => {
           <LinearGradient colors={["#ff3333", "#cc0000"]} style={styles.statIconContainer}>
             <Ionicons name="people" size={24} color="#fff" />
           </LinearGradient>
-          <Text style={styles.statValue}>{dashboardStats?.stats?.userCount || users.length}</Text>
-          <Text style={styles.statLabel}>Total Users</Text>
+          <Text style={[styles.statValue, { color: theme.text }]}>{dashboardStats?.stats?.userCount || users.length}</Text>
+          <Text style={[styles.statLabel, { color: theme.placeholder }]}>Total Users</Text>
         </View>
 
         <View style={styles.statCard}>
           <LinearGradient colors={["#3366ff", "#0033cc"]} style={styles.statIconContainer}>
             <Ionicons name="calendar" size={24} color="#fff" />
           </LinearGradient>
-          <Text style={styles.statValue}>{dashboardStats?.stats?.bookingCount || bookings.length}</Text>
-          <Text style={styles.statLabel}>Bookings</Text>
+          <Text style={[styles.statValue, { color: theme.text }]}>{dashboardStats?.stats?.bookingCount || bookings.length}</Text>
+          <Text style={[styles.statLabel, { color: theme.placeholder }]}>Bookings</Text>
         </View>
       </View>
 
@@ -103,23 +105,23 @@ const AdminDashboardScreen = () => {
           <LinearGradient colors={["#33cc33", "#009900"]} style={styles.statIconContainer}>
             <Ionicons name="football" size={24} color="#fff" />
           </LinearGradient>
-          <Text style={styles.statValue}>{dashboardStats?.stats?.turfCount || turfs.length}</Text>
-          <Text style={styles.statLabel}>Turfs</Text>
+          <Text style={[styles.statValue, { color: theme.text }]}>{dashboardStats?.stats?.turfCount || turfs.length}</Text>
+          <Text style={[styles.statLabel, { color: theme.placeholder }]}>Turfs</Text>
         </View>
 
         <View style={styles.statCard}>
           <LinearGradient colors={["#ff9933", "#cc6600"]} style={styles.statIconContainer}>
             <Ionicons name="cash" size={24} color="#fff" />
           </LinearGradient>
-          <Text style={styles.statValue}>
+          <Text style={[styles.statValue, { color: theme.text }]}>
             ₹{Math.round(dashboardStats?.stats?.totalRevenue || 0).toLocaleString()}
           </Text>
-          <Text style={styles.statLabel}>Revenue</Text>
+          <Text style={[styles.statLabel, { color: theme.placeholder }]}>Revenue</Text>
         </View>
       </View>
 
       <View style={styles.recentActivityContainer}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Activity</Text>
 
         {(dashboardStats?.recentActivity || bookings).slice(0, 5).map((booking, index) => (
           <View key={index} style={styles.activityItem}>
@@ -127,12 +129,12 @@ const AdminDashboardScreen = () => {
               <Ionicons name="football-outline" size={20} color="#ff5555" />
             </View>
             <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>New Booking</Text>
-              <Text style={styles.activitySubtitle}>
+              <Text style={[styles.activityTitle, { color: theme.text }]}>New Booking</Text>
+              <Text style={[styles.activitySubtitle, { color: theme.placeholder }]}>
                 {booking.turf?.name || "Unknown Turf"} - {booking.date}
               </Text>
             </View>
-            <Text style={styles.activityTime}>
+            <Text style={[styles.activityTime, { color: theme.placeholder }]}>
               {new Date(booking.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </Text>
           </View>
@@ -143,7 +145,7 @@ const AdminDashboardScreen = () => {
 
   const renderUsers = () => (
     <View style={styles.usersContainer}>
-      <Text style={styles.sectionTitle}>All Users</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>All Users</Text>
 
       {users.map((userItem, index) => (
         <View key={index} style={styles.userCard}>
@@ -151,9 +153,9 @@ const AdminDashboardScreen = () => {
             <Text style={styles.userInitial}>{userItem.name.charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userItem.name}</Text>
-            <Text style={styles.userEmail}>{userItem.email}</Text>
-            <Text style={styles.userRole}>{userItem.role}</Text>
+            <Text style={[styles.userName, { color: theme.text }]}>{userItem.name}</Text>
+            <Text style={[styles.userEmail, { color: theme.placeholder }]}>{userItem.email}</Text>
+            <Text style={[styles.userRole, { color: theme.primary }]}>{userItem.role}</Text>
           </View>
           <TouchableOpacity 
             style={styles.userActionButton}
@@ -181,12 +183,12 @@ const AdminDashboardScreen = () => {
 
   const renderBookings = () => (
     <View style={styles.bookingsContainer}>
-      <Text style={styles.sectionTitle}>All Bookings</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>All Bookings</Text>
 
       {bookings.map((booking, index) => (
         <View key={index} style={styles.bookingCard}>
           <View style={styles.bookingHeader}>
-            <Text style={styles.bookingId}>#{booking._id.substring(0, 8)}</Text>
+            <Text style={[styles.bookingId, { color: theme.placeholder }]}>#{booking._id.substring(0, 8)}</Text>
             <View style={styles.bookingStatus}>
               <View
                 style={[styles.statusDot, { 
@@ -194,29 +196,29 @@ const AdminDashboardScreen = () => {
                                   booking.status === "completed" ? "#3366ff" : "#ff5555" 
                 }]}
               />
-              <Text style={styles.statusText}>{booking.status}</Text>
+              <Text style={[styles.statusText, { color: theme.text }]}>{booking.status}</Text>
             </View>
           </View>
 
           <View style={styles.bookingDetails}>
             <View style={styles.bookingDetail}>
-              <Text style={styles.bookingDetailLabel}>Turf:</Text>
-              <Text style={styles.bookingDetailValue}>{booking.turf?.name || "Unknown"}</Text>
+              <Text style={[styles.bookingDetailLabel, { color: theme.placeholder }]}>Turf:</Text>
+              <Text style={[styles.bookingDetailValue, { color: theme.text }]}>{booking.turf?.name || "Unknown"}</Text>
             </View>
 
             <View style={styles.bookingDetail}>
-              <Text style={styles.bookingDetailLabel}>Date:</Text>
-              <Text style={styles.bookingDetailValue}>{booking.date}</Text>
+              <Text style={[styles.bookingDetailLabel, { color: theme.placeholder }]}>Date:</Text>
+              <Text style={[styles.bookingDetailValue, { color: theme.text }]}>{booking.date}</Text>
             </View>
 
             <View style={styles.bookingDetail}>
-              <Text style={styles.bookingDetailLabel}>Time:</Text>
-              <Text style={styles.bookingDetailValue}>{booking.timeSlot}</Text>
+              <Text style={[styles.bookingDetailLabel, { color: theme.placeholder }]}>Time:</Text>
+              <Text style={[styles.bookingDetailValue, { color: theme.text }]}>{booking.timeSlot}</Text>
             </View>
 
             <View style={styles.bookingDetail}>
-              <Text style={styles.bookingDetailLabel}>User:</Text>
-              <Text style={styles.bookingDetailValue}>{booking.user?.name || "Unknown"}</Text>
+              <Text style={[styles.bookingDetailLabel, { color: theme.placeholder }]}>User:</Text>
+              <Text style={[styles.bookingDetailValue, { color: theme.text }]}>{booking.user?.name || "Unknown"}</Text>
             </View>
           </View>
 
@@ -264,29 +266,29 @@ const AdminDashboardScreen = () => {
   
   const renderTurfs = () => (
     <View style={styles.turfsContainer}>
-      <Text style={styles.sectionTitle}>All Turfs</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>All Turfs</Text>
       
       {turfs.map((turf, index) => (
         <View key={index} style={styles.turfCard}>
           <View style={styles.turfHeader}>
-            <Text style={styles.turfName}>{turf.name}</Text>
-            <Text style={styles.turfPrice}>₹{turf.pricePerHour}/hour</Text>
+            <Text style={[styles.turfName, { color: theme.text }]}>{turf.name}</Text>
+            <Text style={[styles.turfPrice, { color: theme.primary }]}>₹{turf.pricePerHour}/hour</Text>
           </View>
           
           <View style={styles.turfDetails}>
             <View style={styles.turfDetail}>
-              <Text style={styles.turfDetailLabel}>Location:</Text>
-              <Text style={styles.turfDetailValue} numberOfLines={2}>{turf.location}</Text>
+              <Text style={[styles.turfDetailLabel, { color: theme.placeholder }]}>Location:</Text>
+              <Text style={[styles.turfDetailValue, { color: theme.text }]} numberOfLines={2}>{turf.location}</Text>
             </View>
             
             <View style={styles.turfDetail}>
-              <Text style={styles.turfDetailLabel}>Owner:</Text>
-              <Text style={styles.turfDetailValue}>{turf.owner?.name || "Unknown"}</Text>
+              <Text style={[styles.turfDetailLabel, { color: theme.placeholder }]}>Owner:</Text>
+              <Text style={[styles.turfDetailValue, { color: theme.text }]}>{turf.owner?.name || "Unknown"}</Text>
             </View>
             
             <View style={styles.turfDetail}>
-              <Text style={styles.turfDetailLabel}>Availability:</Text>
-              <Text style={styles.turfDetailValue}>
+              <Text style={[styles.turfDetailLabel, { color: theme.placeholder }]}>Availability:</Text>
+              <Text style={[styles.turfDetailValue, { color: theme.text }]}>
                 {turf.availability ? `${turf.availability.length} time slots` : "No slots"}
               </Text>
             </View>
@@ -337,21 +339,23 @@ const AdminDashboardScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" />
-        <ActivityIndicator size="large" color="#ff5555" />
-        <Text style={styles.loadingText}>Loading admin dashboard...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>  
+        <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.placeholder }]}>Loading admin dashboard...</Text>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-
-      <LinearGradient colors={["#111", "#000"]} style={styles.header}>
-        <Text style={styles.headerTitle}>Admin Dashboard</Text>
-        <Text style={styles.headerSubtitle}>Manage your turf booking platform</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>  
+      <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
+      <LinearGradient
+        colors={[theme.headerBackground, theme.background]}
+        style={styles.header}
+      >
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Admin Dashboard</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.placeholder }]}>Manage your turf booking platform</Text>
       </LinearGradient>
 
       <View style={styles.tabsContainer}>
@@ -359,32 +363,32 @@ const AdminDashboardScreen = () => {
           style={[styles.tab, activeTab === "dashboard" && styles.activeTab]}
           onPress={() => setActiveTab("dashboard")}
         >
-          <Ionicons name="grid-outline" size={20} color={activeTab === "dashboard" ? "#ff5555" : "#aaa"} />
-          <Text style={[styles.tabText, activeTab === "dashboard" && styles.activeTabText]}>Dashboard</Text>
+          <Ionicons name="grid-outline" size={20} color={activeTab === "dashboard" ? theme.primary : theme.placeholder} />
+          <Text style={[styles.tabText, activeTab === "dashboard" && styles.activeTabText, { color: activeTab === "dashboard" ? theme.primary : theme.placeholder }]}>Dashboard</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, activeTab === "users" && styles.activeTab]}
           onPress={() => setActiveTab("users")}
         >
-          <Ionicons name="people-outline" size={20} color={activeTab === "users" ? "#ff5555" : "#aaa"} />
-          <Text style={[styles.tabText, activeTab === "users" && styles.activeTabText]}>Users</Text>
+          <Ionicons name="people-outline" size={20} color={activeTab === "users" ? theme.primary : theme.placeholder} />
+          <Text style={[styles.tabText, activeTab === "users" && styles.activeTabText, { color: activeTab === "users" ? theme.primary : theme.placeholder }]}>Users</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.tab, activeTab === "bookings" && styles.activeTab]}
           onPress={() => setActiveTab("bookings")}
         >
-          <Ionicons name="calendar-outline" size={20} color={activeTab === "bookings" ? "#ff5555" : "#aaa"} />
-          <Text style={[styles.tabText, activeTab === "bookings" && styles.activeTabText]}>Bookings</Text>
+          <Ionicons name="calendar-outline" size={20} color={activeTab === "bookings" ? theme.primary : theme.placeholder} />
+          <Text style={[styles.tabText, activeTab === "bookings" && styles.activeTabText, { color: activeTab === "bookings" ? theme.primary : theme.placeholder }]}>Bookings</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
           style={[styles.tab, activeTab === "turfs" && styles.activeTab]}
           onPress={() => setActiveTab("turfs")}
         >
-          <Ionicons name="football-outline" size={20} color={activeTab === "turfs" ? "#ff5555" : "#aaa"} />
-          <Text style={[styles.tabText, activeTab === "turfs" && styles.activeTabText]}>Turfs</Text>
+          <Ionicons name="football-outline" size={20} color={activeTab === "turfs" ? theme.primary : theme.placeholder} />
+          <Text style={[styles.tabText, activeTab === "turfs" && styles.activeTabText, { color: activeTab === "turfs" ? theme.primary : theme.placeholder }]}>Turfs</Text>
         </TouchableOpacity>
       </View>
 
@@ -398,7 +402,6 @@ const AdminDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     paddingTop: 50,
@@ -408,30 +411,24 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#aaa",
     marginTop: 5,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
   },
   loadingText: {
-    color: "#aaa",
     marginTop: 10,
     fontSize: 16,
   },
   tabsContainer: {
     flexDirection: "row",
-    backgroundColor: "#111",
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 85, 85, 0.3)",
   },
   tab: {
     flex: 1,
@@ -442,15 +439,12 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "#ff5555",
   },
   tabText: {
-    color: "#aaa",
     marginLeft: 5,
     fontSize: 14,
   },
   activeTabText: {
-    color: "#ff5555",
     fontWeight: "bold",
   },
   content: {
@@ -460,7 +454,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 15,
   },
   // Dashboard styles
@@ -474,12 +467,10 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: "48%",
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   statIconContainer: {
     width: 50,
@@ -492,33 +483,27 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 5,
   },
   statLabel: {
     fontSize: 14,
-    color: "#aaa",
   },
   recentActivityContainer: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   activityItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   activityIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 85, 85, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -529,16 +514,13 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#fff",
   },
   activitySubtitle: {
     fontSize: 12,
-    color: "#aaa",
     marginTop: 2,
   },
   activityTime: {
     fontSize: 12,
-    color: "#aaa",
   },
   // Users styles
   usersContainer: {
@@ -547,18 +529,15 @@ const styles = StyleSheet.create({
   userCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   userIconContainer: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(255, 85, 85, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -566,7 +545,6 @@ const styles = StyleSheet.create({
   userInitial: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#ff5555",
   },
   userInfo: {
     flex: 1,
@@ -574,24 +552,20 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 2,
   },
   userEmail: {
     fontSize: 14,
-    color: "#aaa",
     marginBottom: 2,
   },
   userRole: {
     fontSize: 12,
-    color: "#ff5555",
     textTransform: "uppercase",
   },
   userActionButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -600,12 +574,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   bookingCard: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   bookingHeader: {
     flexDirection: "row",
@@ -614,11 +586,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   bookingId: {
     fontSize: 14,
-    color: "#aaa",
   },
   bookingStatus: {
     flexDirection: "row",
@@ -632,7 +602,6 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    color: "#fff",
     textTransform: "uppercase",
   },
   bookingDetails: {
@@ -645,12 +614,10 @@ const styles = StyleSheet.create({
   bookingDetailLabel: {
     width: 60,
     fontSize: 14,
-    color: "#aaa",
   },
   bookingDetailValue: {
     flex: 1,
     fontSize: 14,
-    color: "#fff",
   },
   bookingActions: {
     flexDirection: "row",
@@ -658,7 +625,6 @@ const styles = StyleSheet.create({
   bookingActionButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#333",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -668,7 +634,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 85, 85, 0.2)",
   },
   bookingActionText: {
-    color: "#fff",
     fontSize: 12,
     marginLeft: 5,
   },
@@ -677,12 +642,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   turfCard: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   turfHeader: {
     flexDirection: "row",
@@ -691,16 +654,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   turfName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
   },
   turfPrice: {
     fontSize: 14,
-    color: "#ff5555",
     fontWeight: "bold",
   },
   turfDetails: {
@@ -713,12 +673,10 @@ const styles = StyleSheet.create({
   turfDetailLabel: {
     width: 80,
     fontSize: 14,
-    color: "#aaa",
   },
   turfDetailValue: {
     flex: 1,
     fontSize: 14,
-    color: "#fff",
   },
 })
 

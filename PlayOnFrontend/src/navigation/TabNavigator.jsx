@@ -9,11 +9,13 @@ import SettingsScreen from "../screens/SettingsScreen";
 import AdminDashboardScreen from "../screens/AdminDashboardScreen";
 import TurfOwnerDashboardScreen from "../screens/TurfOwnerDashboardScreen"; // Add turf owner screen
 import { AuthContext } from "../context/AuthContext";
+import { ThemeContext } from "../context/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { user } = useContext(AuthContext);
+  const { theme, darkMode } = useContext(ThemeContext);
   
   return (
     <Tab.Navigator
@@ -29,16 +31,16 @@ const TabNavigator = () => {
           else if (route.name === "Owner") iconName = "football";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#ff0000", // Red for active tab
-        tabBarInactiveTintColor: "#888", // Gray for inactive tabs
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.placeholder,
         tabBarStyle: {
-          backgroundColor: "#111", // Dark background
-          borderTopColor: "#ff0000", // Red accent
+          backgroundColor: theme.headerBackground,
+          borderTopColor: theme.border,
         },
         headerStyle: {
-          backgroundColor: "#111", // Dark header background
+          backgroundColor: theme.headerBackground,
         },
-        headerTintColor: "#fff", // White text in header
+        headerTintColor: theme.text,
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

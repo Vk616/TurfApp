@@ -1,13 +1,35 @@
-export default {
-    primary: "#007bff",  // Primary blue
-    secondary: "#6c757d", // Gray
-    success: "#28a745",  // Green
-    danger: "#dc3545",  // Red
-    warning: "#ffc107",  // Yellow
-    info: "#17a2b8",  // Cyan
-    light: "#f8f9fa",  // Light gray
-    dark: "#343a40",  // Dark gray
-    white: "#ffffff",
-    black: "#000000",
-  };
-  
+export const lightTheme = {
+  background: '#ffffff',
+  cardBackground: '#f8f9fa',
+  primary: '#007bff',
+  secondary: '#6c757d',
+  accent: '#28a745',
+  danger: '#dc3545',
+  warning: '#ffc107',
+  info: '#17a2b8',
+  text: '#343a40',
+  placeholder: '#6c757d',
+  border: '#dee2e6',
+  headerBackground: '#ffffff',
+  primaryLight: '#cce5ff',  // light variant of primary
+  overlay: 'rgba(0,0,0,0.05)',
+  shadow: '#000000',
+};
+
+export const darkTheme = {
+  background: '#121212',
+  cardBackground: '#1e1e1e',
+  primary: '#0d6efd',
+  secondary: '#adb5bd',
+  accent: '#198754',
+  danger: '#dc3545',
+  warning: '#ffc107',
+  info: '#17a2b8',
+  text: '#f8f9fa',
+  placeholder: '#ced4da',
+  border: '#343a40',
+  headerBackground: '#1e1e1e',
+  primaryLight: '#4dabf7',
+  overlay: 'rgba(255,255,255,0.05)',
+  shadow: '#000000',
+};

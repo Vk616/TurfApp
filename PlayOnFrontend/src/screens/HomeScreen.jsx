@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
 } from "react-native"
 import { TurfContext } from "../context/TurfContext"
+import { ThemeContext } from "../context/ThemeContext"
 import TurfCard from "../components/TurfCard"
 import SearchBar from "../components/SearchBar"
 import { Ionicons } from "@expo/vector-icons"
@@ -19,6 +20,7 @@ import { LinearGradient } from "expo-linear-gradient"
 
 const HomeScreen = ({ navigation }) => {
   const { turfs, loading } = useContext(TurfContext)
+  const { theme, darkMode } = useContext(ThemeContext)
   const [searchQuery, setSearchQuery] = useState("")
   const scrollY = useRef(new Animated.Value(0)).current
   const [categories] = useState([
@@ -39,10 +41,10 @@ const HomeScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer, { backgroundColor: theme.background }]}>
         <StatusBar barStyle="light-content" />
-        <ActivityIndicator size="large" color="#ff3333" />
-        <Text style={styles.loaderText}>Loading Turfs...</Text>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loaderText, { color: theme.text }]}>Loading Turfs...</Text>
       </View>
     )
   }
@@ -60,13 +62,13 @@ const HomeScreen = ({ navigation }) => {
   })
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
-      <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-        <LinearGradient colors={["#000", "transparent"]} style={styles.headerGradient}>
-          <Text style={styles.headerTitle}>Find Your Perfect</Text>
-          <Text style={styles.headerHighlight}>Turf</Text>
+      <Animated.View style={[styles.header, { opacity: headerOpacity, backgroundColor: theme.headerBackground }]}>
+        <LinearGradient colors={[theme.primaryLight, theme.background]} style={styles.headerGradient}>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Find Your Perfect</Text>
+          <Text style={[styles.headerHighlight, { color: theme.primary }]}>Turf</Text>
         </LinearGradient>
       </Animated.View>
 
@@ -87,11 +89,23 @@ const HomeScreen = ({ navigation }) => {
               contentContainerStyle={styles.categoriesContainer}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[styles.categoryButton, selectedCategory === item.id && styles.selectedCategory]}
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === item.id && { backgroundColor: theme.primary, borderColor: theme.primary },
+                  ]}
                   onPress={() => setSelectedCategory(item.id)}
                 >
-                  <Ionicons name={item.icon} size={18} color={selectedCategory === item.id ? "#fff" : "#aaa"} />
-                  <Text style={[styles.categoryText, selectedCategory === item.id && styles.selectedCategoryText]}>
+                  <Ionicons
+                    name={item.icon}
+                    size={18}
+                    color={selectedCategory === item.id ? theme.text : theme.placeholder}
+                  />
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategory === item.id && { color: theme.text, fontWeight: "bold" },
+                    ]}
+                  >
                     {item.name}
                   </Text>
                 </TouchableOpacity>
@@ -102,8 +116,8 @@ const HomeScreen = ({ navigation }) => {
         renderItem={({ item }) => <TurfCard turf={item} onPress={handleTurfPress} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="search-outline" size={60} color="#ff3333" />
-            <Text style={styles.emptyText}>No turfs found</Text>
+            <Ionicons name="search-outline" size={60} color={theme.placeholder} />
+            <Text style={[styles.emptyText, { color: theme.placeholder }]}>No turfs found</Text>
           </View>
         }
       />
@@ -114,7 +128,6 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     position: "absolute",
@@ -131,12 +144,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
   },
   headerHighlight: {
     fontSize: 36,
     fontWeight: "bold",
-    color: "#ff3333",
     marginTop: -5,
   },
   listContent: {
@@ -147,10 +158,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
   },
   loaderText: {
-    color: "#ff3333",
     marginTop: 10,
     fontSize: 16,
   },
@@ -160,26 +169,15 @@ const styles = StyleSheet.create({
   categoryButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#222",
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 20,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 0, 0.2)",
-  },
-  selectedCategory: {
-    backgroundColor: "#ff3333",
-    borderColor: "#ff3333",
   },
   categoryText: {
-    color: "#aaa",
     marginLeft: 5,
     fontWeight: "500",
-  },
-  selectedCategoryText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
   emptyContainer: {
     alignItems: "center",
@@ -187,7 +185,6 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
   },
   emptyText: {
-    color: "#aaa",
     fontSize: 16,
     marginTop: 10,
   },

@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, StatusBar, ActivityIndicator } from "react-native"
 import { getAllEvents } from "../api/eventApi"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
+import { ThemeContext } from '../context/ThemeContext'
 
 // Mock event images for demo purposes
 const eventImages = [
@@ -14,7 +15,8 @@ const eventImages = [
   "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=1000",
 ]
 
-const EventsScreen = () => {
+const EventsScreen = ({ navigation }) => {
+  const { theme, darkMode } = useContext(ThemeContext)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -55,36 +57,43 @@ const EventsScreen = () => {
   }
 
   const renderEventCard = ({ item }) => (
-    <TouchableOpacity style={styles.eventCard} activeOpacity={0.9}>
+    <TouchableOpacity
+      style={[styles.eventCard, { backgroundColor: theme.cardBackground, borderColor: theme.border, shadowColor: theme.shadow }]}
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('EventDetails', { eventId: item._id })}
+    >
       <Image source={{ uri: item.image }} style={styles.eventImage} />
-      <LinearGradient colors={["transparent", "rgba(0,0,0,0.8)"]} style={styles.eventGradient} />
+      <LinearGradient
+        colors={['transparent', theme.cardBackground + 'AA']}
+        style={styles.eventGradient}
+      />
 
       <View style={styles.eventContent}>
-        <View style={styles.eventBadge}>
-          <Text style={styles.eventBadgeText}>{item.time}</Text>
+        <View style={[styles.eventBadge, { backgroundColor: theme.primary }]}>  
+          <Text style={[styles.eventBadgeText, { color: theme.text }]}>{item.time}</Text>
         </View>
 
-        <Text style={styles.eventTitle}>{item.name}</Text>
+        <Text style={[styles.eventTitle, { color: theme.text }]}>{item.name}</Text>
 
         <View style={styles.eventDetails}>
           <View style={styles.eventDetailItem}>
-            <Ionicons name="calendar-outline" size={16} color="#ff5555" />
-            <Text style={styles.eventDetailText}>{formatDate(item.date)}</Text>
+            <Ionicons name="calendar-outline" size={16} color={theme.primary} />
+            <Text style={[styles.eventDetailText, { color: theme.placeholder }]}>{formatDate(item.date)}</Text>
           </View>
 
           <View style={styles.eventDetailItem}>
-            <Ionicons name="location-outline" size={16} color="#ff5555" />
-            <Text style={styles.eventDetailText}>{item.location}</Text>
+            <Ionicons name="location-outline" size={16} color={theme.primary} />
+            <Text style={[styles.eventDetailText, { color: theme.placeholder }]}>{item.location}</Text>
           </View>
 
           <View style={styles.eventDetailItem}>
-            <Ionicons name="people-outline" size={16} color="#ff5555" />
-            <Text style={styles.eventDetailText}>{item.participants} participants</Text>
+            <Ionicons name="people-outline" size={16} color={theme.primary} />
+            <Text style={[styles.eventDetailText, { color: theme.placeholder }]}>{item.participants} participants</Text>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.registerButton}>
-          <Text style={styles.registerButtonText}>Register Now</Text>
+        <TouchableOpacity style={[styles.registerButton, { borderColor: theme.primary }]}>  
+          <Text style={[styles.registerButtonText, { color: theme.primary }]}>Register Now</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -92,28 +101,28 @@ const EventsScreen = () => {
 
   if (loading && !refreshing) {
     return (
-      <View style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" />
-        <ActivityIndicator size="large" color="#ff5555" />
-        <Text style={styles.loadingText}>Loading events...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.placeholder }]}>Loading events...</Text>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
-      <LinearGradient colors={["#111", "#000"]} style={styles.header}>
-        <Text style={styles.headerTitle}>Upcoming Events</Text>
-        <Text style={styles.headerSubtitle}>Join tournaments and football events</Text>
+      <LinearGradient colors={[theme.headerBackground, theme.background]} style={styles.header}>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Upcoming Events</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.placeholder }]}>Join tournaments and football events</Text>
       </LinearGradient>
 
       {events.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={80} color="#ff5555" />
-          <Text style={styles.emptyText}>No upcoming events</Text>
-          <Text style={styles.emptySubtext}>Check back later for new events</Text>
+          <Ionicons name="calendar-outline" size={80} color={theme.primary} />
+          <Text style={[styles.emptyText, { color: theme.text }]}>No upcoming events</Text>
+          <Text style={[styles.emptySubtext, { color: theme.placeholder }]}>Check back later for new events</Text>
         </View>
       ) : (
         <FlatList
@@ -133,7 +142,6 @@ const EventsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     paddingTop: 50,
@@ -143,21 +151,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#aaa",
     marginTop: 5,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
   },
   loadingText: {
-    color: "#aaa",
     marginTop: 10,
     fontSize: 16,
   },
@@ -169,13 +173,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
-    color: "#fff",
     marginTop: 20,
     fontWeight: "bold",
   },
   emptySubtext: {
     fontSize: 16,
-    color: "#aaa",
     marginTop: 10,
     textAlign: "center",
   },
@@ -183,13 +185,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   eventCard: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 0, 0.3)",
-    shadowColor: "#ff0000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -197,6 +196,7 @@ const styles = StyleSheet.create({
   },
   eventImage: {
     width: "100%",
+
     height: 180,
   },
   eventGradient: {
@@ -213,20 +213,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -30,
     right: 15,
-    backgroundColor: "#ff5555",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   eventBadgeText: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },
   eventTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 10,
   },
   eventDetails: {
@@ -238,20 +235,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   eventDetailText: {
-    color: "#bbb",
     marginLeft: 8,
     fontSize: 14,
   },
   registerButton: {
-    backgroundColor: "rgba(255, 85, 85, 0.2)",
     borderWidth: 1,
-    borderColor: "#ff5555",
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: "center",
   },
   registerButtonText: {
-    color: "#ff5555",
     fontWeight: "bold",
     fontSize: 14,
   },

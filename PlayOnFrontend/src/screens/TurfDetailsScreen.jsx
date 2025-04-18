@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import {
   View,
   Text,
@@ -17,10 +17,12 @@ import { getTurfById } from "../api/turfApi"
 import Button from "../components/Button"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
+import { ThemeContext } from "../context/ThemeContext"
 
 const { width } = Dimensions.get("window")
 
 const TurfDetailsScreen = ({ route, navigation }) => {
+  const { theme, darkMode } = useContext(ThemeContext)
   const { turfId } = route.params || {}
   const [turf, setTurf] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -56,27 +58,27 @@ const TurfDetailsScreen = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#ff3333" />
-        <Text style={styles.loaderText}>Loading turf details...</Text>
+      <View style={[styles.loaderContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loaderText, { color: theme.primary }]}>Loading turf details...</Text>
       </View>
     )
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#ff3333" />
-        <Text style={styles.error}>{error}</Text>
+      <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
+        <Ionicons name="alert-circle-outline" size={60} color={theme.primary} />
+        <Text style={[styles.error, { color: theme.error }]}>{error}</Text>
       </View>
     )
   }
 
   if (!turf) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="#ff3333" />
-        <Text style={styles.error}>Turf details not available.</Text>
+      <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
+        <Ionicons name="alert-circle-outline" size={60} color={theme.primary} />
+        <Text style={[styles.error, { color: theme.error }]}>Turf details not available.</Text>
       </View>
     )
   }
@@ -84,8 +86,8 @@ const TurfDetailsScreen = ({ route, navigation }) => {
   const allImages = [turf.image, ...additionalImages]
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Main Image with Gradient Overlay */}
@@ -111,18 +113,18 @@ const TurfDetailsScreen = ({ route, navigation }) => {
         <View style={styles.detailsContainer}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.name}>{turf.name}</Text>
+              <Text style={[styles.name, { color: theme.text }]}>{turf.name}</Text>
               <View style={styles.locationContainer}>
-                <Ionicons name="location" size={16} color="#ff5555" />
-                <Text style={styles.location}>{turf.location}</Text>
+                <Ionicons name="location" size={16} color={theme.primary} />
+                <Text style={[styles.location, { color: theme.placeholder }]}>{turf.location}</Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.priceCard}>
+          <View style={[styles.priceCard, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
             <View>
-              <Text style={styles.priceLabel}>Price per hour</Text>
-              <Text style={styles.price}>₹{turf.pricePerHour}</Text>
+              <Text style={[styles.priceLabel, { color: theme.placeholder }]}>Price per hour</Text>
+              <Text style={[styles.price, { color: theme.primary }]}>₹{turf.pricePerHour}</Text>
             </View>
             <Button
               title="Book Now"
@@ -133,49 +135,49 @@ const TurfDetailsScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Description</Text>
+            <Text style={[styles.description, { color: theme.placeholder }]}>
               {turf.description ||
                 "Experience the ultimate playing surface at our premium turf. Perfect for football, cricket, and other sports. State-of-the-art facilities with floodlights for evening games."}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Amenities</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Amenities</Text>
             <View style={styles.amenitiesContainer}>
               <View style={styles.amenityItem}>
-                <Ionicons name="water-outline" size={24} color="#ff5555" />
-                <Text style={styles.amenityText}>Water</Text>
+                <Ionicons name="water-outline" size={24} color={theme.primary} />
+                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Water</Text>
               </View>
               <View style={styles.amenityItem}>
-                <Ionicons name="car-outline" size={24} color="#ff5555" />
-                <Text style={styles.amenityText}>Parking</Text>
+                <Ionicons name="car-outline" size={24} color={theme.primary} />
+                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Parking</Text>
               </View>
               <View style={styles.amenityItem}>
-                <Ionicons name="flash-outline" size={24} color="#ff5555" />
-                <Text style={styles.amenityText}>Floodlights</Text>
+                <Ionicons name="flash-outline" size={24} color={theme.primary} />
+                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Floodlights</Text>
               </View>
               <View style={styles.amenityItem}>
-                <Ionicons name="shirt-outline" size={24} color="#ff5555" />
-                <Text style={styles.amenityText}>Changing Room</Text>
+                <Ionicons name="shirt-outline" size={24} color={theme.primary} />
+                <Text style={[styles.amenityText, { color: theme.placeholder }]}>Changing Room</Text>
               </View>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            <View style={styles.mapPlaceholder}>
-              <Ionicons name="map-outline" size={30} color="#ff5555" />
-              <Text style={styles.mapText}>Map View</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Location</Text>
+            <View style={[styles.mapPlaceholder, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+              <Ionicons name="map-outline" size={30} color={theme.primary} />
+              <Text style={[styles.mapText, { color: theme.placeholder }]}>Map View</Text>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { backgroundColor: theme.cardBackground, borderTopColor: theme.border }]}>
         <View>
-          <Text style={styles.bottomPrice}>₹{turf.pricePerHour}</Text>
-          <Text style={styles.bottomPriceLabel}>per hour</Text>
+          <Text style={[styles.bottomPrice, { color: theme.primary }]}>₹{turf.pricePerHour}</Text>
+          <Text style={[styles.bottomPriceLabel, { color: theme.placeholder }]}>per hour</Text>
         </View>
         <Button
           title="Book Now"
@@ -190,16 +192,13 @@ const TurfDetailsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111",
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111",
   },
   loaderText: {
-    color: "#ff3333",
     marginTop: 10,
     fontSize: 16,
   },
@@ -207,11 +206,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111",
     padding: 20,
   },
   error: {
-    color: "#ff4444",
     fontSize: 18,
     textAlign: "center",
     marginTop: 20,
@@ -274,7 +271,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
   },
   locationContainer: {
     flexDirection: "row",
@@ -283,11 +279,9 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 16,
-    color: "#bbb",
     marginLeft: 5,
   },
   priceCard: {
-    backgroundColor: "#222",
     borderRadius: 16,
     padding: 15,
     flexDirection: "row",
@@ -295,14 +289,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 0, 0.3)",
   },
   priceLabel: {
-    color: "#aaa",
     fontSize: 14,
   },
   price: {
-    color: "#ff5555",
     fontSize: 24,
     fontWeight: "bold",
   },
@@ -315,11 +306,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 10,
   },
   description: {
-    color: "#bbb",
     lineHeight: 22,
   },
   amenitiesContainer: {
@@ -333,20 +322,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   amenityText: {
-    color: "#bbb",
     marginLeft: 10,
   },
   mapPlaceholder: {
     height: 150,
-    backgroundColor: "#222",
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 0, 0.3)",
   },
   mapText: {
-    color: "#aaa",
     marginTop: 5,
   },
   bottomBar: {
@@ -354,23 +339,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#222",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 0, 0, 0.3)",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 15,
     paddingBottom: Platform.OS === "ios" ? 30 : 15,
+    borderTopWidth: 1,
   },
   bottomPrice: {
-    color: "#ff5555",
     fontSize: 20,
     fontWeight: "bold",
   },
   bottomPriceLabel: {
-    color: "#aaa",
     fontSize: 12,
   },
   bottomButton: {

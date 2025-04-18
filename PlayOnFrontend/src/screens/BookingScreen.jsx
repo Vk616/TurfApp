@@ -16,6 +16,7 @@ import {
 } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { createBooking, getAvailableTimeSlots } from "../api/bookingApi"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
@@ -24,6 +25,7 @@ import Button from "../components/Button"
 const BookingScreen = ({ route, navigation }) => {
   const { turfId, turfName } = route.params || {}
   const { user } = useContext(AuthContext)
+  const { theme, darkMode } = useContext(ThemeContext)
   const [date, setDate] = useState(new Date())
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [availableSlots, setAvailableSlots] = useState([])
@@ -259,15 +261,16 @@ const BookingScreen = ({ route, navigation }) => {
 
     return (
       <View style={styles.timeSection}>
-        <Text style={styles.timeSectionTitle}>{title}</Text>
+        <Text style={[styles.timeSectionTitle, { color: theme.primary }]}>{title}</Text>
         <View style={styles.timeSlotsGrid}>
           {slots.map((slot, index) => (
             <TouchableOpacity
               key={index}
               style={[
                 styles.timeSlot,
-                !slot.isAvailable && styles.bookedSlot,
-                selectedStartSlot && slot.startTimeISO === selectedStartSlot.startTimeISO && styles.selectedStartSlot,
+                { backgroundColor: theme.cardBackground, borderColor: theme.border },
+                !slot.isAvailable && { backgroundColor: theme.disabled },
+                selectedStartSlot && slot.startTimeISO === selectedStartSlot.startTimeISO && { backgroundColor: theme.primary },
               ]}
               onPress={() => slot.isAvailable && handleStartSlotSelection(slot)}
               disabled={!slot.isAvailable}
@@ -275,17 +278,18 @@ const BookingScreen = ({ route, navigation }) => {
               <Text
                 style={[
                   styles.timeSlotText,
-                  !slot.isAvailable && styles.bookedSlotText,
-                  selectedStartSlot && slot.startTimeISO === selectedStartSlot.startTimeISO && styles.selectedSlotText,
+                  { color: theme.text },
+                  !slot.isAvailable && { color: theme.placeholder },
+                  selectedStartSlot && slot.startTimeISO === selectedStartSlot.startTimeISO && { color: theme.text },
                 ]}
               >
                 {slot.displayTime}
               </Text>
               {!slot.isAvailable && (
-                <Ionicons name="close-circle" size={16} color="#ff3333" style={styles.bookedIcon} />
+                <Ionicons name="close-circle" size={16} color={theme.danger} style={styles.bookedIcon} />
               )}
               {selectedStartSlot && slot.startTimeISO === selectedStartSlot.startTimeISO && (
-                <Text style={styles.slotLabel}>Start</Text>
+                <Text style={[styles.slotLabel, { color: theme.text }]}>Start</Text>
               )}
             </TouchableOpacity>
           ))}
@@ -311,17 +315,19 @@ const BookingScreen = ({ route, navigation }) => {
               {
                 opacity: modalOpacityAnim,
                 transform: [{ scale: modalScaleAnim }],
+                backgroundColor: theme.cardBackground,
+                borderColor: theme.border,
               },
             ]}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select End Time</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setShowEndTimeModal(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Select End Time</Text>
+              <TouchableOpacity style={[styles.closeButton, { backgroundColor: theme.overlay }]} onPress={() => setShowEndTimeModal(false)}>
+                <Ionicons name="close" size={24} color={theme.text} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalSubtitle}>Choose when you want to finish (max 3 hours)</Text>
+            <Text style={[styles.modalSubtitle, { color: theme.placeholder }]}>Choose when you want to finish (max 3 hours)</Text>
 
             {endSlots.length > 0 ? (
               <View style={styles.endTimeSlotsGrid}>
@@ -330,16 +336,18 @@ const BookingScreen = ({ route, navigation }) => {
                     key={index}
                     style={[
                       styles.endTimeSlot,
-                      selectedEndSlot && slot.startTimeISO === selectedEndSlot.startTimeISO && styles.selectedEndSlot,
+                      { backgroundColor: theme.cardBackground, borderColor: theme.border },
+                      selectedEndSlot && slot.startTimeISO === selectedEndSlot.startTimeISO && { backgroundColor: theme.primary },
                     ]}
                     onPress={() => handleEndSlotSelection(slot)}
                   >
                     <Text
                       style={[
                         styles.endTimeSlotText,
+                        { color: theme.text },
                         selectedEndSlot &&
                           slot.startTimeISO === selectedEndSlot.startTimeISO &&
-                          styles.selectedSlotText,
+                          { color: theme.text },
                       ]}
                     >
                       {slot.displayTime}
@@ -349,9 +357,9 @@ const BookingScreen = ({ route, navigation }) => {
               </View>
             ) : (
               <View style={styles.noSlotsContainer}>
-                <Ionicons name="alert-circle-outline" size={40} color="#ff5555" />
-                <Text style={styles.noSlotsText}>No available end times for this selection.</Text>
-                <Text style={styles.noSlotsSubtext}>Please select a different start time.</Text>
+                <Ionicons name="alert-circle-outline" size={40} color={theme.danger} />
+                <Text style={[styles.noSlotsText, { color: theme.danger }]}>No available end times for this selection.</Text>
+                <Text style={[styles.noSlotsSubtext, { color: theme.placeholder }]}>Please select a different start time.</Text>
               </View>
             )}
           </Animated.View>
@@ -364,24 +372,24 @@ const BookingScreen = ({ route, navigation }) => {
     if (selectedStartSlot && selectedEndSlot) {
       return (
         <View style={styles.summaryContainer}>
-          <LinearGradient colors={["rgba(255,85,85,0.1)", "rgba(255,85,85,0.05)"]} style={styles.summaryGradient}>
-            <Text style={styles.summaryTitle}>Booking Summary</Text>
+          <LinearGradient colors={[theme.overlay, theme.cardBackground]} style={[styles.summaryGradient, { borderColor: theme.border }]}>
+            <Text style={[styles.summaryTitle, { color: theme.text }]}>Booking Summary</Text>
 
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Date:</Text>
-              <Text style={styles.summaryValue}>{date.toDateString()}</Text>
+              <Text style={[styles.summaryLabel, { color: theme.placeholder }]}>Date:</Text>
+              <Text style={[styles.summaryValue, { color: theme.text }]}>{date.toDateString()}</Text>
             </View>
 
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Time:</Text>
-              <Text style={styles.summaryValue}>
+              <Text style={[styles.summaryLabel, { color: theme.placeholder }]}>Time:</Text>
+              <Text style={[styles.summaryValue, { color: theme.text }]}>
                 {selectedStartSlot.displayTime} - {selectedEndSlot.displayTime}
               </Text>
             </View>
 
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Duration:</Text>
-              <Text style={styles.summaryValue}>
+              <Text style={[styles.summaryLabel, { color: theme.placeholder }]}>Duration:</Text>
+              <Text style={[styles.summaryValue, { color: theme.text }]}>
                 {Math.round(
                   (new Date(selectedEndSlot.startTimeISO) - new Date(selectedStartSlot.startTimeISO)) /
                     (60 * 60 * 1000),
@@ -390,7 +398,7 @@ const BookingScreen = ({ route, navigation }) => {
               </Text>
             </View>
             
-            <Text style={styles.summaryNote}>
+            <Text style={[styles.summaryNote, { color: theme.primary }]}>
               Note: The ending time slot ({selectedEndSlot.displayTime}) is not included in your booking.
             </Text>
           </LinearGradient>
@@ -401,24 +409,24 @@ const BookingScreen = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
-      <LinearGradient colors={["#111", "#000"]} style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+      <LinearGradient colors={[theme.headerBackground, theme.background]} style={styles.header}>
+        <TouchableOpacity style={[styles.backButton, { backgroundColor: theme.overlay }]} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Book Turf</Text>
-        <Text style={styles.headerSubtitle}>{turfName || "Select your time slot"}</Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Book Turf</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.primary }]}>{turfName || "Select your time slot"}</Text>
       </LinearGradient>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, { backgroundColor: theme.background }]} showsVerticalScrollIndicator={false}>
         <View style={styles.dateContainer}>
-          <Text style={styles.dateLabel}>Select Date</Text>
-          <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-            <Ionicons name="calendar-outline" size={20} color="#ff5555" style={styles.dateIcon} />
-            <Text style={styles.dateText}>{date.toDateString()}</Text>
-            <Ionicons name="chevron-down" size={20} color="#ff5555" />
+          <Text style={[styles.dateLabel, { color: theme.text }]}>Select Date</Text>
+          <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.cardBackground, borderColor: theme.border }]} onPress={() => setShowDatePicker(true)}>
+            <Ionicons name="calendar-outline" size={20} color={theme.primary} style={styles.dateIcon} />
+            <Text style={[styles.dateText, { color: theme.text }]}>{date.toDateString()}</Text>
+            <Ionicons name="chevron-down" size={20} color={theme.primary} />
           </TouchableOpacity>
 
           {showDatePicker && (
@@ -434,33 +442,33 @@ const BookingScreen = ({ route, navigation }) => {
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#ff5555" />
-            <Text style={styles.loadingText}>Loading available slots...</Text>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.loadingText, { color: theme.placeholder }]}>Loading available slots...</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle-outline" size={60} color="#ff5555" />
-            <Text style={styles.errorText}>{error}</Text>
+            <Ionicons name="alert-circle-outline" size={60} color={theme.danger} />
+            <Text style={[styles.errorText, { color: theme.text }]}>{error}</Text>
             <Button title="Try Again" onPress={fetchAvailableSlots} style={styles.retryButton} />
           </View>
         ) : (
           <>
             <View style={styles.timeSlotsContainer}>
-              <Text style={styles.timeSlotsTitle}>Select Start Time</Text>
-              <Text style={styles.timeSlotsSubtitle}>Choose when you want to start playing</Text>
+              <Text style={[styles.timeSlotsTitle, { color: theme.text }]}>Select Start Time</Text>
+              <Text style={[styles.timeSlotsSubtitle, { color: theme.placeholder }]}>Choose when you want to start playing</Text>
 
               <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: "#222" }]} />
-                  <Text style={styles.legendText}>Available</Text>
+                  <View style={[styles.legendDot, { backgroundColor: theme.cardBackground }]} />
+                  <Text style={[styles.legendText, { color: theme.placeholder }]}>Available</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: "#444" }]} />
-                  <Text style={styles.legendText}>Booked</Text>
+                  <View style={[styles.legendDot, { backgroundColor: theme.disabled }]} />
+                  <Text style={[styles.legendText, { color: theme.placeholder }]}>Booked</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: "#ff5555" }]} />
-                  <Text style={styles.legendText}>Selected</Text>
+                  <View style={[styles.legendDot, { backgroundColor: theme.primary }]} />
+                  <Text style={[styles.legendText, { color: theme.placeholder }]}>Selected</Text>
                 </View>
               </View>
 
@@ -475,13 +483,13 @@ const BookingScreen = ({ route, navigation }) => {
       {renderEndTimeModal()}
 
       {selectedStartSlot && selectedEndSlot && (
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { backgroundColor: theme.headerBackground, borderTopColor: theme.border }]}>
           <Button
             title="Confirm Booking"
             onPress={handleBooking}
             loading={bookingLoading}
             style={styles.confirmButton}
-            icon={<Ionicons name="checkmark-circle-outline" size={20} color="#fff" style={{ marginLeft: 8 }} />}
+            icon={<Ionicons name="checkmark-circle-outline" size={20} color={theme.text} style={{ marginLeft: 8 }} />}
           />
         </View>
       )}
@@ -492,7 +500,6 @@ const BookingScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight + 10,
@@ -503,7 +510,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
@@ -511,11 +517,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#ff5555",
     marginTop: 5,
   },
   content: {
@@ -528,24 +532,20 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 10,
   },
   dateButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#222",
     borderRadius: 12,
     padding: 15,
     borderWidth: 1,
-    borderColor: "rgba(255, 85, 85, 0.3)",
   },
   dateIcon: {
     marginRight: 10,
   },
   dateText: {
     flex: 1,
-    color: "#fff",
     fontSize: 16,
   },
   loadingContainer: {
@@ -554,7 +554,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   loadingText: {
-    color: "#aaa",
     marginTop: 10,
     fontSize: 16,
   },
@@ -564,7 +563,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   errorText: {
-    color: "#ff5555",
     marginTop: 10,
     marginBottom: 20,
     fontSize: 16,
@@ -579,19 +577,16 @@ const styles = StyleSheet.create({
   timeSlotsTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 5,
   },
   timeSlotsSubtitle: {
     fontSize: 14,
-    color: "#aaa",
     marginBottom: 15,
   },
   legendContainer: {
     flexDirection: "row",
     marginBottom: 15,
     justifyContent: "space-between",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 8,
     padding: 10,
   },
@@ -606,7 +601,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-    color: "#aaa",
     fontSize: 12,
   },
   timeSection: {
@@ -614,7 +608,6 @@ const styles = StyleSheet.create({
   },
   timeSectionTitle: {
     fontSize: 16,
-    color: "#ff5555",
     marginBottom: 10,
     fontWeight: "500",
   },
@@ -627,36 +620,14 @@ const styles = StyleSheet.create({
     width: "31%",
     margin: "1%",
     height: 50,
-    backgroundColor: "#222",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
     position: "relative",
   },
-  bookedSlot: {
-    backgroundColor: "#444",
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
-  selectedStartSlot: {
-    backgroundColor: "#ff5555",
-    borderColor: "#ff5555",
-  },
-  selectedEndSlot: {
-    backgroundColor: "#ff5555",
-    borderColor: "#ff5555",
-  },
   timeSlotText: {
-    color: "#fff",
     fontSize: 14,
-  },
-  bookedSlotText: {
-    color: "#888",
-  },
-  selectedSlotText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
   bookedIcon: {
     position: "absolute",
@@ -667,22 +638,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 5,
     fontSize: 10,
-    color: "rgba(255, 255, 255, 0.8)",
     fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContainer: {
     width: "85%",
-    backgroundColor: "#1a1a1a",
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 85, 85, 0.3)",
   },
   modalHeader: {
     flexDirection: "row",
@@ -693,19 +660,16 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
   },
   closeButton: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalSubtitle: {
     fontSize: 14,
-    color: "#aaa",
     marginBottom: 20,
   },
   endTimeSlotsGrid: {
@@ -717,15 +681,12 @@ const styles = StyleSheet.create({
     width: "31%",
     margin: "1%",
     height: 50,
-    backgroundColor: "#222",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   endTimeSlotText: {
-    color: "#fff",
     fontSize: 14,
   },
   noSlotsContainer: {
@@ -733,14 +694,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   noSlotsText: {
-    color: "#ff5555",
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     textAlign: "center",
   },
   noSlotsSubtext: {
-    color: "#aaa",
     fontSize: 14,
     marginTop: 5,
     textAlign: "center",
@@ -752,12 +711,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     borderWidth: 1,
-    borderColor: "rgba(255, 85, 85, 0.3)",
   },
   summaryTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 15,
   },
   summaryRow: {
@@ -766,17 +723,14 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     width: 80,
-    color: "#aaa",
     fontSize: 14,
   },
   summaryValue: {
     flex: 1,
-    color: "#fff",
     fontSize: 14,
     fontWeight: "500",
   },
   summaryNote: {
-    color: "#ff5555",
     fontSize: 13,
     marginTop: 15,
     fontStyle: "italic",
@@ -787,9 +741,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(17, 17, 17, 0.9)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255, 85, 85, 0.3)",
     padding: 15,
     paddingBottom: Platform.OS === "ios" ? 30 : 15,
   },

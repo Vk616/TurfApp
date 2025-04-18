@@ -1,9 +1,11 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
 import { AuthContext } from "../context/AuthContext";
+import { ThemeContext } from "../context/ThemeContext";
 
 const SignupScreen = ({ navigation }) => {
   const { register } = useContext(AuthContext);
+  const { theme, darkMode } = useContext(ThemeContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,38 +46,43 @@ const SignupScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Sign Up</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
+      <Text style={[styles.header, { color: theme.text }]}>Sign Up</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.text }]}
         placeholder="Name"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={theme.placeholder}
         onChangeText={setName}
+        value={name}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.text }]}
         placeholder="Email"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={theme.placeholder}
         onChangeText={setEmail}
+        value={email}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.text }]}
         placeholder="Phone"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={theme.placeholder}
         onChangeText={setPhone}
+        value={phone}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: theme.cardBackground, borderColor: theme.border, color: theme.text }]}
         placeholder="Password"
-        placeholderTextColor="#aaa"
+        placeholderTextColor={theme.placeholder}
         secureTextEntry
         onChangeText={setPassword}
+        value={password}
       />
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleSignup}>
+        <Text style={[styles.buttonText, { color: theme.text }]}>Sign Up</Text>
       </TouchableOpacity>
-      <Text onPress={() => navigation.navigate("Login")} style={styles.link}>
-        Already have an account? <Text style={styles.linkHighlight}>Login</Text>
+      <Text onPress={() => navigation.navigate("Login")} style={[styles.link, { color: theme.placeholder }]}>
+        Already have an account? <Text style={[styles.linkHighlight, { color: theme.primary }]}>Login</Text>
       </Text>
     </View>
   );
@@ -86,42 +93,33 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: "center",
-    backgroundColor: "#111", // Dark background
   },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#fff", // White text
     textAlign: "center",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ff0000", // Red outline
-    backgroundColor: "#222", // Dark input field
     padding: 12,
     marginBottom: 12,
     borderRadius: 8,
-    color: "#fff", // White text inside input
   },
   button: {
-    backgroundColor: "#ff0000", // Red button
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff", // White text on button
     fontSize: 16,
     fontWeight: "bold",
   },
   link: {
     marginTop: 15,
-    color: "#aaa", // Grey text
     textAlign: "center",
   },
   linkHighlight: {
-    color: "#ff0000", // Red highlight for Login
     fontWeight: "bold",
   },
 });

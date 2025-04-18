@@ -3,14 +3,15 @@
 import { useContext, useState } from "react"
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, StatusBar, Alert } from "react-native"
 import { AuthContext } from "../context/AuthContext"
+import { ThemeContext } from "../context/ThemeContext"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import Button from "../components/Button"
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useContext(AuthContext)
+  const { theme, darkMode, toggleTheme } = useContext(ThemeContext)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [darkModeEnabled, setDarkModeEnabled] = useState(true)
   const [locationEnabled, setLocationEnabled] = useState(true)
 
   const handleLogout = () => {
@@ -21,53 +22,56 @@ const SettingsScreen = ({ navigation }) => {
   }
 
   const renderSettingItem = (icon, title, description, value, onValueChange) => (
-    <View style={styles.settingItem}>
-      <View style={styles.settingIconContainer}>
-        <Ionicons name={icon} size={22} color="#ff5555" />
+    <View style={[styles.settingItem, { borderBottomColor: theme.border }]}>
+      <View style={[styles.settingIconContainer, { backgroundColor: theme.cardBackground }]}>
+        <Ionicons name={icon} size={22} color={theme.primary} />
       </View>
       <View style={styles.settingContent}>
-        <Text style={styles.settingTitle}>{title}</Text>
-        <Text style={styles.settingDescription}>{description}</Text>
+        <Text style={[styles.settingTitle, { color: theme.text }]}>{title}</Text>
+        <Text style={[styles.settingDescription, { color: theme.placeholder }]}>{description}</Text>
       </View>
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: "#444", true: "rgba(255, 85, 85, 0.5)" }}
-        thumbColor={value ? "#ff5555" : "#aaa"}
+        trackColor={{ false: theme.border, true: theme.primary }}
+        thumbColor={value ? theme.primary : theme.placeholder}
       />
     </View>
   )
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
 
-      <LinearGradient colors={["#111", "#000"]} style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerSubtitle}>Customize your app experience</Text>
+      <LinearGradient
+        colors={[theme.headerBackground, theme.background]}
+        style={styles.header}
+      >
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Settings</Text>
+        <Text style={[styles.headerSubtitle, { color: theme.placeholder }]}>Customize your app experience</Text>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {user && (
-          <View style={styles.profileSection}>
-            <View style={styles.profileImageContainer}>
-              <Text style={styles.profileInitial}>{user.name.charAt(0).toUpperCase()}</Text>
+          <View style={[styles.profileSection, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+            <View style={[styles.profileImageContainer, { backgroundColor: theme.primaryLight }]}>
+              <Text style={[styles.profileInitial, { color: theme.primary }]}>{user.name.charAt(0).toUpperCase()}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{user.name}</Text>
-              <Text style={styles.profileEmail}>{user.email}</Text>
-              <View style={styles.profileBadge}>
-                <Text style={styles.profileBadgeText}>{user.role}</Text>
+              <Text style={[styles.profileName, { color: theme.text }]}>{user.name}</Text>
+              <Text style={[styles.profileEmail, { color: theme.placeholder }]}>{user.email}</Text>
+              <View style={[styles.profileBadge, { backgroundColor: theme.primaryLight }]}>
+                <Text style={[styles.profileBadgeText, { color: theme.primary }]}>{user.role}</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.editProfileButton}>
-              <Ionicons name="create-outline" size={20} color="#fff" />
+            <TouchableOpacity style={[styles.editProfileButton, { backgroundColor: theme.overlay }]}>
+              <Ionicons name="create-outline" size={20} color={theme.text} />
             </TouchableOpacity>
           </View>
         )}
 
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>App Settings</Text>
+        <View style={[styles.settingsSection, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>App Settings</Text>
 
           {renderSettingItem(
             "notifications-outline",
@@ -80,9 +84,9 @@ const SettingsScreen = ({ navigation }) => {
           {renderSettingItem(
             "moon-outline",
             "Dark Mode",
-            "Use dark theme throughout the app",
-            darkModeEnabled,
-            setDarkModeEnabled,
+            "Use theme throughout the app",
+            darkMode,
+            toggleTheme,
           )}
 
           {renderSettingItem(
@@ -94,76 +98,76 @@ const SettingsScreen = ({ navigation }) => {
           )}
         </View>
 
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Account</Text>
+        <View style={[styles.settingsSection, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="lock-closed-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="lock-closed-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>Change Password</Text>
-              <Text style={styles.accountDescription}>Update your account password</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>Change Password</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>Update your account password</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#aaa" />
+            <Ionicons name="chevron-forward" size={20} color={theme.placeholder} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="card-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="card-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>Payment Methods</Text>
-              <Text style={styles.accountDescription}>Manage your payment options</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>Payment Methods</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>Manage your payment options</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#aaa" />
+            <Ionicons name="chevron-forward" size={20} color={theme.placeholder} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="help-circle-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="help-circle-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>Help & Support</Text>
-              <Text style={styles.accountDescription}>Contact us for assistance</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>Help & Support</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>Contact us for assistance</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#aaa" />
+            <Ionicons name="chevron-forward" size={20} color={theme.placeholder} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>About</Text>
+        <View style={[styles.settingsSection, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>About</Text>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="information-circle-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="information-circle-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>App Version</Text>
-              <Text style={styles.accountDescription}>1.0.0</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>App Version</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>1.0.0</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="document-text-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="document-text-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>Terms of Service</Text>
-              <Text style={styles.accountDescription}>Read our terms and conditions</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>Terms of Service</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>Read our terms and conditions</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#aaa" />
+            <Ionicons name="chevron-forward" size={20} color={theme.placeholder} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.accountItem}>
-            <View style={styles.accountIconContainer}>
-              <Ionicons name="shield-checkmark-outline" size={22} color="#ff5555" />
+            <View style={[styles.accountIconContainer, { backgroundColor: theme.cardBackground }]}>
+              <Ionicons name="shield-checkmark-outline" size={22} color={theme.primary} />
             </View>
             <View style={styles.accountContent}>
-              <Text style={styles.accountTitle}>Privacy Policy</Text>
-              <Text style={styles.accountDescription}>How we handle your data</Text>
+              <Text style={[styles.accountTitle, { color: theme.text }]}>Privacy Policy</Text>
+              <Text style={[styles.accountDescription, { color: theme.placeholder }]}>How we handle your data</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#aaa" />
+            <Ionicons name="chevron-forward" size={20} color={theme.placeholder} />
           </TouchableOpacity>
         </View>
 
@@ -171,7 +175,7 @@ const SettingsScreen = ({ navigation }) => {
           title="Logout"
           onPress={handleLogout}
           style={styles.logoutButton}
-          icon={<Ionicons name="log-out-outline" size={20} color="#fff" style={{ marginLeft: 8 }} />}
+          icon={<Ionicons name="log-out-outline" size={20} color={theme.text} style={{ marginLeft: 8 }} />}
         />
       </ScrollView>
     </View>
@@ -181,7 +185,6 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
   header: {
     paddingTop: 50,
@@ -191,11 +194,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#fff",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#aaa",
     marginTop: 5,
   },
   content: {
@@ -205,18 +206,15 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 85, 85, 0.3)",
   },
   profileImageContainer: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: "rgba(255, 85, 85, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -224,7 +222,6 @@ const styles = StyleSheet.create({
   profileInitial: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#ff5555",
   },
   profileInfo: {
     flex: 1,
@@ -232,23 +229,19 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 5,
   },
   profileEmail: {
     fontSize: 14,
-    color: "#aaa",
     marginBottom: 8,
   },
   profileBadge: {
-    backgroundColor: "rgba(255, 85, 85, 0.2)",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
     alignSelf: "flex-start",
   },
   profileBadgeText: {
-    color: "#ff5555",
     fontSize: 12,
     fontWeight: "bold",
     textTransform: "uppercase",
@@ -257,22 +250,18 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
   settingsSection: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 16,
     padding: 15,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
     marginBottom: 15,
     paddingHorizontal: 5,
   },
@@ -281,13 +270,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   settingIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 85, 85, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -297,25 +284,21 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    color: "#fff",
     marginBottom: 2,
   },
   settingDescription: {
     fontSize: 12,
-    color: "#aaa",
   },
   accountItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   accountIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 85, 85, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -325,12 +308,10 @@ const styles = StyleSheet.create({
   },
   accountTitle: {
     fontSize: 16,
-    color: "#fff",
     marginBottom: 2,
   },
   accountDescription: {
     fontSize: 12,
-    color: "#aaa",
   },
   logoutButton: {
     marginBottom: 30,
