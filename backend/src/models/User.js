@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String },
-    role: { type: String, enum: ["user", "admin"], default: "user" }, // Turf owners are admins
+    role: { type: String, enum: ["user", "admin", "turf_owner"], default: "user" }, // Added turf_owner role
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

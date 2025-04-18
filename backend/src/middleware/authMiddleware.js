@@ -29,4 +29,12 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+const turfOwner = (req, res, next) => {
+  if (req.user && (req.user.role === "admin" || req.user.role === "turf_owner")) {
+    next();
+  } else {
+    res.status(403).json({ message: "Not authorized as an admin or turf owner" });
+  }
+};
+
+module.exports = { protect, admin, turfOwner };

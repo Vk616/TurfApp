@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Turf from "./src/models/Turf.js"; // Ensure correct import
 import User from "./src/models/User.js"; // Needed for turf owners
+import bcrypt from "bcryptjs"; // Added for password hashing
 
 dotenv.config();
 
@@ -109,11 +110,22 @@ const seedDatabase = async () => {
     await Turf.deleteMany();
     console.log("🗑️ Existing turfs removed");
 
-    // **Find an Admin User (Turf Owner)**
-    const adminUser = await User.findOne({ role: "admin" });
+    // **Create Admin User if not exists**
+    let adminUser = await User.findOne({ role: "admin" });
     if (!adminUser) {
-      console.log("❌ No admin user found. Create an admin first.");
-      process.exit(1);
+      console.log("🔧 Creating admin user...");
+      
+      // NOTE: No need to hash password manually - User model will do it via pre-save hook
+      adminUser = await User.create({
+        name: "Admin User",
+        email: "admin@playonturf.com",
+        password: "admin123", // Plain password - will be hashed by the User model
+        phone: "1234567890",
+        role: "admin"
+      });
+      console.log(`✅ Admin user created with email: ${adminUser.email} and password: admin123`);
+    } else {
+      console.log("✅ Admin user already exists");
     }
 
     // **Insert Turfs with Generated Time Slots**

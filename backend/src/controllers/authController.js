@@ -1,86 +1,166 @@
 const User = require("../models/User");
-const { generateToken } = require("../config/authConfig");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-// Register User
+// Helper function to generate JWT token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "30d",
+  });
+};
+
+// @desc    Register user
+// @route   POST /api/auth/register
+// @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
+    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Create user
     const user = await User.create({
       name,
       email,
       password,
       phone,
-      role: role || "user" // 👈 Ensures role is set correctly, defaults to "user"
     });
 
     if (user) {
       res.status(201).json({
-        _id: user.id,
+        _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role, // 👈 Include role in response
-        token: generateToken(user.id),
+        phone: user.phone,
+        role: user.role,
+        token: generateToken(user._id),
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
+    console.error("Error in registerUser:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-
-// Login User
+// @desc    Login user
+// @route   POST /api/auth/login
+// @access  Public
 const loginUser = async (req, res) => {
   try {
-    console.log("🟢 Login request received:", req.body.email);
-
     const { email, password } = req.body;
+
+    // Find user by email
     const user = await User.findOne({ email });
 
-    if (!user) {
-      console.log("❌ User not found:", email);
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    console.log("🔑 Checking password for:", user.email);
-
-    if (!user.matchPassword) {
-      console.error("❌ matchPassword method missing in User model");
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
-    const isMatch = await user.matchPassword(password);
-    console.log("Password Match:", isMatch);
-
-    if (isMatch) {
-      console.log("✅ Login successful for:", user.email);
+    // Check if user exists and password matches
+    if (user && (await user.matchPassword(password))) {
       res.json({
-        _id: user.id,
+        _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
-        token: generateToken(user.id),
+        token: generateToken(user._id),
       });
     } else {
-      console.log("❌ Incorrect password for:", user.email);
       res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {
-    console.error("🚨 Server Error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error in loginUser:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Logout User
-const logoutUser = (req, res) => {
-  res.status(200).json({ message: "User logged out successfully" });
+// @desc    Logout user
+// @route   POST /api/auth/logout
+// @access  Public
+const logoutUser = async (req, res) => {
+  try {
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error in logoutUser:", error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+// @desc    Create an admin user (protected by master key)
+// @route   POST /api/auth/create-admin
+// @access  Private (requires MASTER_KEY)
+const createAdminUser = async (req, res) => {
+  try {
+    // Verify master key for security
+    const { masterKey, name, email, password, phone } = req.body;
+    
+    if (masterKey !== process.env.MASTER_KEY) {
+      return res.status(401).json({ message: "Unauthorized: Invalid master key" });
+    }
+
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User with this email already exists" });
+    }
+
+    // Create admin user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      role: "admin"  // Set role as admin
+    });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        message: "Admin user created successfully"
+      });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  } catch (error) {
+    console.error("Error in createAdminUser:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Promote user to admin (Admin only)
+// @route   PATCH /api/auth/promote/:id
+// @access  Private/Admin
+const promoteToAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Update user role to admin
+    user.role = "admin";
+    await user.save();
+    
+    res.json({ 
+      message: "User promoted to admin successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error("Error in promoteToAdmin:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, createAdminUser, promoteToAdmin };
